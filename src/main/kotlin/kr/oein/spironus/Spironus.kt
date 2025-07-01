@@ -19,9 +19,7 @@ class Spironus : JavaPlugin() {
             if (it is Number && it.toInt() > 0) {
                 logger.info("Listening on port: ${it.toInt()}")
                 webServer.start(it.toInt())
-            } else {
-                logger.warning("Invalid 'listen' configuration, expected a number but got: $it")
-            }
+            } else logger.warning("Invalid 'listen' configuration, expected a number but got: $it")
         } ?: run {
             logger.warning("No 'listen(int, 1 - 65535)' configuration found, please check your config.yml")
         }
