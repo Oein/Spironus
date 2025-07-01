@@ -3,4 +3,47 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <link rel="stylesheet" href="static/framework.css" />
 <h1>Spironus</h1>
-<h2>Control Panel</h2>
+<h2>Informations</h2>
+<figure>
+  <p><strong>Country Name: </strong><span id="countryName">Spironus</span></p>
+  <p><strong>Country Leader: </strong><span id="leaderName">Oein</span></p>
+  <p><strong>Citizens: </strong><span id="citizensCount">1</span></p>
+</figure>
+<h2>Whitelist</h2>
+<figure>
+  <p style="text-align: center">There is no whitelist queue at the moment.</p>
+</figure>
+
+<h2>Citizens</h2>
+<figure
+  style="
+    max-height: min(80dvh, 600px);
+    overflow-y: auto;
+    box-sizing: border-box;
+  "
+>
+  <div
+    class="full"
+    style="overflow-x: hidden; margin: 0px; box-sizing: border-box"
+  >
+    <table
+      class="full"
+      style="
+        min-height: fit-content;
+        height: fit-content;
+        box-sizing: border-box;
+      "
+    >
+      <thead>
+        <tr>
+          <th>Player</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="citizens-list"></tbody>
+    </table>
+    <p style="text-align: center; padding-top: 1.5rem">
+      There are no citizens at the moment.
+    </p>
+  </div>
+</figure>
