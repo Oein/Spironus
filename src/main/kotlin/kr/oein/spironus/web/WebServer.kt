@@ -10,7 +10,7 @@ class WebServer(spironus: Spironus) {
         config.showJavalinBanner = false
     }
 
-    var adminPassword = "1234"
+    var adminPassword = ""
     val adminTokens = mutableSetOf<String>()
 
     init {
@@ -55,7 +55,6 @@ class WebServer(spironus: Spironus) {
                 "js" -> "application/javascript"
                 "png" -> "image/png"
                 "jpg", "jpeg" -> "image/jpeg"
-                "gif" -> "image/gif"
                 else -> "application/octet-stream"
             } + ", charset=UTF-8"
             if (staticFile != null) {
