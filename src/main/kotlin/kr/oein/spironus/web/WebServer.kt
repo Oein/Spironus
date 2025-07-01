@@ -14,32 +14,17 @@ class WebServer(spironus: Spironus) {
     val adminTokens = mutableSetOf<String>()
 
     init {
-        val adminPW = spironus.config.get("password")
-        if (adminPW is String && adminPW.isNotEmpty())
-            adminPassword = adminPW
-
         app.get("/") { ctx ->
             ctx.redirect("/index.html")
         }
 
-        app.get("/authorize") { ctx ->
-            val password = ctx.queryParam("password")
-            if (password == adminPassword) {
-                val token = generateToken()
-                adminTokens.add(token)
-                ctx.result("{\"token\":\"$token\"}")
+        setPasswordFromConfig()
+        initializePasswordValidator()
 
-                val timer = Timer()
-                timer.schedule(object : java.util.TimerTask() {
-                    override fun run() {
-                        adminTokens.remove(token)
-                        timer.cancel()
-                        timer.purge()
-                    }
-                }, 60 * 60 * 1000) // Token expires after 1 hour
-            } else ctx.status(403).result("Forbidden: Invalid password")
-        }
+        initializeStaticFiles()
+    }
 
+    private fun initializeStaticFiles() {
         app.get("/*") { ctx ->
             ctx.res().characterEncoding = "UTF-8"
 
@@ -58,6 +43,41 @@ class WebServer(spironus: Spironus) {
                 ctx.contentType(contentType)
                 ctx.result(staticFile.readAllBytes())
             } else ctx.status(404).result("File not found")
+        }
+    }
+
+    private fun setPasswordFromConfig() {
+        val adminPW = spironus.config.get("password")
+        if (adminPW is String && adminPW.isNotEmpty())
+            adminPassword = adminPW
+    }
+
+    private fun initializePasswordValidator() {
+        app.get("/authorize") { ctx ->
+            val password = ctx.queryParam("password")
+            if (password == adminPassword) {
+                val token = generateToken()
+                adminTokens.add(token)
+                ctx.result("{\"token\":\"$token\"}")
+
+                val timer = Timer()
+                timer.schedule(object : java.util.TimerTask() {
+                    override fun run() {
+                        adminTokens.remove(token)
+                        timer.cancel()
+                        timer.purge()
+                    }
+                }, 60 * 60 * 1000) // Token expires after 1 hour
+            } else ctx.status(403).result("Forbidden: Invalid password")
+        }
+
+        app.get("/validate") { ctx ->
+            val token = ctx.queryParam("token")
+            if (token != null && validateToken(token)) {
+                ctx.result("Token is valid")
+            } else {
+                ctx.status(403).result("Forbidden: Invalid token")
+            }
         }
     }
 

@@ -1,43 +1,6 @@
-
 <title>Spironus | Admin</title>
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="static/framework.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="static/framework.css" />
 <h1>Spironus</h1>
-<h2>Authorize your account</h2>
-
-<form id="auth-form">
-    <fieldset>
-        <legend>Sign in</legend>
-        <p>
-            <label for="text">Password</label>
-            <input class="full" id="text" type="password" placeholder="Password"/>
-        </p>
-        <button class="full" type="submit">Submit</button>
-    </fieldset>
-</form>
-
-<script>
-    let form = document.getElementById("auth-form");
-    form.addEventListener("submit", function (event) {
-        event.preventDefault();
-        let password = document.getElementById("text").value;
-        fetch("/authorize?password=" + encodeURIComponent(password))
-            .then(response => {
-                if (response.ok) {
-                    return response.json().then((data) => {
-                        // data.token to localStorage
-                        localStorage.setItem("token", data.token);
-                    })
-                } else {
-                    console.error("Authorization failed");
-                    alert("Authorization failed. Please check your password.");
-                }
-            })
-            .catch(error => {
-                console.error("Error during authorization:", error);
-                alert("An error occurred during authorization. Please try again.");
-            });
-        document.getElementById("text").value = "";
-    });
-</script>
+<h2>Control Panel</h2>

@@ -1,0 +1,71 @@
+<title>Spironus | Admin</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="static/framework.css" />
+<h1>Spironus</h1>
+<h2>Authorize your account</h2>
+
+<form id="auth-form">
+  <fieldset>
+    <legend>Sign in</legend>
+    <p>
+      <label for="text">Password</label>
+      <input class="full" id="text" type="password" placeholder="Password" />
+    </p>
+    <button class="full" type="submit">Submit</button>
+  </fieldset>
+</form>
+
+<script>
+  localStorage.removeItem("localtest");
+  if (localStorage.getItem("token")) {
+    // If token is already set, redirect to admin page
+    fetch(
+      "/validate?token=" + encodeURIComponent(localStorage.getItem("token"))
+    )
+      .then((response) => {
+        if (response.ok) {
+          return response.text().then((data) => {
+            if (data === "Token is valid") {
+              location.href = "./admin.html";
+            } else {
+              console.error("Invalid token");
+              localStorage.removeItem("token");
+            }
+          });
+        } else {
+          console.error("Failed to validate token");
+        }
+      })
+      .catch((error) => {
+        console.error("Error during token validation:", error);
+      });
+  }
+  let form = document.getElementById("auth-form");
+  form.addEventListener("submit", function (event) {
+    event.preventDefault();
+    let password = document.getElementById("text").value;
+    if (password == "localtest") {
+      localStorage.setItem("localtest", "true");
+      location.href = "./admin.html";
+      return;
+    }
+    fetch("/authorize?password=" + encodeURIComponent(password))
+      .then((response) => {
+        if (response.ok) {
+          return response.json().then((data) => {
+            // data.token to localStorage
+            localStorage.setItem("token", data.token);
+          });
+        } else {
+          console.error("Authorization failed");
+          alert("Authorization failed. Please check your password.");
+        }
+      })
+      .catch((error) => {
+        console.error("Error during authorization:", error);
+        alert("An error occurred during authorization. Please try again.");
+      });
+    document.getElementById("text").value = "";
+  });
+</script>
