@@ -15,9 +15,8 @@ class WebServer(spironus: Spironus) {
 
     init {
         val adminPW = spironus.config.get("password")
-        if (adminPW is String && adminPW.isNotEmpty()) {
+        if (adminPW is String && adminPW.isNotEmpty())
             adminPassword = adminPW
-        }
 
         app.get("/") { ctx ->
             ctx.redirect("/index.html")
@@ -38,15 +37,12 @@ class WebServer(spironus: Spironus) {
                         timer.purge()
                     }
                 }, 60 * 60 * 1000) // Token expires after 1 hour
-            } else {
-                ctx.status(403).result("Forbidden: Invalid password")
-            }
+            } else ctx.status(403).result("Forbidden: Invalid password")
         }
 
         app.get("/*") { ctx ->
             ctx.res().characterEncoding = "UTF-8"
 
-            // Serve static files from the "static" directory
             val staticFile = spironus.getResource("web${ctx.path()}")
             val fileExtension = ctx.path().substringAfterLast('.', "")
             val contentType = when (fileExtension) {
@@ -61,9 +57,7 @@ class WebServer(spironus: Spironus) {
             if (staticFile != null) {
                 ctx.contentType(contentType)
                 ctx.result(staticFile.readAllBytes())
-            } else {
-                ctx.status(404).result("File not found")
-            }
+            } else ctx.status(404).result("File not found")
         }
     }
 
