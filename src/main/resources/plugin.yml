@@ -1,0 +1,4 @@
+name: Spironus
+version: '1.0.0'
+main: kr.oein.spironus.Spironus
+api-version: '1.21'
