@@ -55,6 +55,7 @@ class WebServer(spironus: Spironus) {
                 "js" -> "application/javascript"
                 "png" -> "image/png"
                 "jpg", "jpeg" -> "image/jpeg"
+                "webp" -> "image/webp"
                 else -> "application/octet-stream"
             } + ", charset=UTF-8"
             if (staticFile != null) {
