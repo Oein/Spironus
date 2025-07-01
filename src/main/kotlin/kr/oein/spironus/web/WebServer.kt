@@ -1,11 +1,12 @@
 package kr.oein.spironus.web
 
 import io.javalin.Javalin;
+import io.javalin.http.servlet.JavalinServletContext
 import kr.oein.spironus.Spironus
 import java.util.Timer
 import kotlin.collections.mapOf
 
-class WebServer(spironus: Spironus) {
+class WebServer(val spironus: Spironus) {
     private val app: Javalin = Javalin.create { config ->
         config.showJavalinBanner = false
     }
@@ -16,6 +17,19 @@ class WebServer(spironus: Spironus) {
     init {
         app.get("/") { ctx ->
             ctx.redirect("/index.html")
+        }
+
+        app.before("/adminapi/*") { ctx ->
+            spironus.logger.info { "Admin API accessed: ${ctx.path()}" }
+            val token = ctx.queryParam("token")
+            if (token == null || !validateToken(token)) {
+                ctx.status(403).result("Forbidden: Invalid or missing token")
+                (ctx as JavalinServletContext).tasks.clear()
+            }
+        }
+
+        app.get("/adminapi/status") { ctx ->
+            ctx.result("Server is running")
         }
 
         setPasswordFromConfig()
