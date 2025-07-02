@@ -17,6 +17,8 @@ class WebServer(val spironus: Spironus) {
     var adminPassword = ""
     val adminTokens = mutableSetOf<String>()
 
+    val teamMasterTokens = mutableMapOf<String, String>() // Token 2 Team ID
+
     init {
         app.get("/") { ctx ->
             ctx.redirect("/index.html")
@@ -24,7 +26,7 @@ class WebServer(val spironus: Spironus) {
 
         app.before("/adminapi/*") { ctx ->
             val token = ctx.queryParam("token")
-            if (token == null || !validateToken(token)) {
+            if (token == null || !validateAdminToken(token)) {
                 ctx.status(403).result("Forbidden: Invalid or missing token")
                 (ctx as JavalinServletContext).tasks.clear()
                 spironus.logger.info { "Token invalid or missing token" }
@@ -87,7 +89,7 @@ class WebServer(val spironus: Spironus) {
 
         app.get("/validate") { ctx ->
             val token = ctx.queryParam("token")
-            if (token != null && validateToken(token)) {
+            if (token != null && validateAdminToken(token)) {
                 ctx.result("Token is valid")
             } else {
                 ctx.status(403).result("Forbidden: Invalid token")
@@ -274,19 +276,33 @@ class WebServer(val spironus: Spironus) {
         }
     }
 
-    fun generateToken(): String {
+    private fun generateToken(): String {
         return java.util.UUID.randomUUID().toString()
     }
 
-    fun validateToken(token: String): Boolean {
+    public fun validateAdminToken(token: String): Boolean {
         return adminTokens.contains(token)
     }
 
-    fun start(port: Int) {
+    public fun issueTeamMasterToken(teamId: String): String {
+        val token = generateToken()
+        teamMasterTokens[token] = teamId
+        val timer = Timer()
+        timer.schedule(object : java.util.TimerTask() {
+            override fun run() {
+                teamMasterTokens.remove(token)
+                timer.cancel()
+                timer.purge()
+            }
+        }, 60 * 60 * 1000) // Token expires after 1 hour
+        return token
+    }
+
+    public fun start(port: Int) {
         app.start(port)
     }
 
-    fun stop() {
+    public fun stop() {
         app.stop()
     }
 }

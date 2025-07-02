@@ -16,6 +16,7 @@ class Spironus : JavaPlugin() {
     val guiManager = GUIManager()
     val guiListener = GUIListener(guiManager)
     val webServer = WebServer(this)
+    
     override fun onEnable() {
 
         Bukkit.getPluginManager().registerEvents(guiListener, this)
