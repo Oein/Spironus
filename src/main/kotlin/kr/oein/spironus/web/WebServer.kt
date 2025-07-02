@@ -100,6 +100,17 @@ class WebServer(val spironus: Spironus) {
             ctx.result("Server is running")
         }
 
+        app.post("/adminapi/reload") { ctx ->
+            ctx.result("Server reload requested")
+            spironus.server.reload()
+        }
+
+        initializeAdminAPI_whitelist()
+        initializeAdminAPI_teams()
+        initializeAdminAPI_playerinfo()
+    }
+
+    private fun initializeAdminAPI_whitelist() {
         app.get("/adminapi/whitelist") { ctx ->
             val whitelist = kvdb.keys("whitelist")
             ctx.json(whitelist)
@@ -126,46 +137,9 @@ class WebServer(val spironus: Spironus) {
                 ctx.status(400).result("Bad Request: Missing or invalid PID")
             }
         }
+    }
 
-        app.get("/adminapi/kv/playerinfo-nickname") { ctx ->
-            val pid = ctx.queryParam("pid")
-            if (pid != null && pid.isNotEmpty()) {
-                val nickname = kvdb.get("playerinfo-nickname", pid)
-                if (nickname != null) {
-                    ctx.result(nickname.toString())
-                } else {
-                    ctx.status(404).result("Nickname not found for PID: $pid")
-                }
-            } else {
-                ctx.status(400).result("Bad Request: Missing or invalid PID")
-            }
-        }
-
-        app.get("/adminapi/kv/playerinfo-team") { ctx ->
-            val pid = ctx.queryParam("pid")
-            if (pid != null && pid.isNotEmpty()) {
-                val value = kvdb.get("playerinfo-team", pid)
-                if (value != null) {
-                    ctx.result(value.toString())
-                } else {
-                    ctx.status(404).result("Team not found for PID: $pid")
-                }
-            } else {
-                ctx.status(400).result("Bad Request: Missing or invalid PID")
-            }
-        }
-
-        app.post("/adminapi/kv/playerinfo-team/set") { ctx ->
-            val pid = ctx.queryParam("pid")
-            val team = ctx.queryParam("team")
-            if (pid != null && pid.isNotEmpty() && team != null && team.isNotEmpty()) {
-                kvdb.set("playerinfo-team", pid, team)
-                ctx.result("Team for player with PID $pid set to $team")
-            } else {
-                ctx.status(400).result("Bad Request: Missing or invalid PID or team")
-            }
-        }
-
+    private fun initializeAdminAPI_teams() {
         app.get("/adminapi/kv/teams") { ctx ->
             val teams = kvdb.loadScope("teams").yamlcfg
             val kkv = teams.getKeys(false).associateWith { key ->
@@ -257,10 +231,46 @@ class WebServer(val spironus: Spironus) {
                 ctx.status(400).result("Bad Request: Missing or invalid team ID")
             }
         }
+    }
 
-        app.post("/adminapi/reload") { ctx ->
-            ctx.result("Server reload requested")
-            spironus.server.reload()
+    private fun initializeAdminAPI_playerinfo() {
+        app.get("/adminapi/kv/playerinfo-nickname") { ctx ->
+            val pid = ctx.queryParam("pid")
+            if (pid != null && pid.isNotEmpty()) {
+                val nickname = kvdb.get("playerinfo-nickname", pid)
+                if (nickname != null) {
+                    ctx.result(nickname.toString())
+                } else {
+                    ctx.status(404).result("Nickname not found for PID: $pid")
+                }
+            } else {
+                ctx.status(400).result("Bad Request: Missing or invalid PID")
+            }
+        }
+
+        app.get("/adminapi/kv/playerinfo-team") { ctx ->
+            val pid = ctx.queryParam("pid")
+            if (pid != null && pid.isNotEmpty()) {
+                val value = kvdb.get("playerinfo-team", pid)
+                if (value != null) {
+                    ctx.result(value.toString())
+                } else {
+                    ctx.status(404).result("Team not found for PID: $pid")
+                }
+            } else {
+                ctx.status(400).result("Bad Request: Missing or invalid PID")
+            }
+        }
+
+        app.post("/adminapi/kv/playerinfo-team/set") { ctx ->
+            val pid = ctx.queryParam("pid")
+            val team = ctx.queryParam("team")
+            if (pid != null && pid.isNotEmpty() && team != null && team.isNotEmpty()) {
+                kvdb.set("playerinfo-team", pid, team)
+                ctx.result("Team for player with PID $pid set to $team")
+            } else {
+                ctx.status(400).result("Bad Request: Missing or invalid PID or team")
+            }
         }
     }
 
