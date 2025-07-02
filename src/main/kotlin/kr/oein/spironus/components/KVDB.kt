@@ -5,38 +5,37 @@ import org.bukkit.configuration.file.YamlConfiguration
 import kotlin.io.path.Path
 
 class KVDB(val spironus: Spironus) {
-    var yamlcfg: YamlConfiguration = YamlConfiguration()
+    var scopes: MutableMap<String, KVDB_Scope> = mutableMapOf()
 
-    fun load() {
-        // load from db.yml
-        val file = spironus.dataFolder.resolve("db.yml")
-        if (file.exists()) {
-            // Load the data from the file
-            yamlcfg = YamlConfiguration.loadConfiguration(file)
+    fun loadScope(scope: String): KVDB_Scope {
+        if (scopes.containsKey(scope)) return scopes[scope]!!
+        return KVDB_Scope(spironus, scope).also {
+            it.load()
+            scopes[scope] = it
         }
     }
 
-    fun save() {
-        // Save the data to db.yml
-        val file = spironus.dataFolder.resolve("db.yml")
-        yamlcfg.save(file)
+    fun get(scope: String, key: String): Any? {
+        return loadScope(scope).get(key)
     }
 
-    fun get(key: String): Any? {
-        return yamlcfg.get(key)
+    fun set(scope: String, key: String, value: Any) {
+        loadScope(scope).set(key, value)
     }
 
-    fun set(key: String, value: Any) {
-        yamlcfg.set(key, value)
-        save() // Save after setting a new value
+    fun remove(scope: String, key: String) {
+        loadScope(scope).remove(key)
     }
 
-    fun remove(key: String) {
-        yamlcfg.set(key, null)
-        save() // Save after removing a value
+    fun has(scope: String, key: String): Boolean {
+        return loadScope(scope).has(key)
     }
 
-    fun has(key: String): Boolean {
-        return yamlcfg.contains(key)
+    fun keys(scope: String): Set<String> {
+        return loadScope(scope).keys()
+    }
+
+    fun clear(scope: String) {
+        loadScope(scope).clear()
     }
 }

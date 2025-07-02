@@ -2,8 +2,128 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <link rel="stylesheet" href="static/framework.css" />
+<style>
+  .team-select {
+    width: 100%;
+    box-sizing: border-box;
+    min-width: fit-content;
+  }
+</style>
 <h1>Spironus</h1>
-<h2>Control Panel</h2>
+<h2>Whitelist</h2>
+
+<form id="whitelist-form">
+  <fieldset>
+    <legend>Whitelist a Player</legend>
+    <p>
+      <label for="playerHash">Player Hash</label>
+      <input
+        class="full"
+        id="playerHash"
+        type="text"
+        placeholder="Enter player hash to whitelist"
+      />
+    </p>
+    <button class="full" id="whitelist-button">Add to Whitelist</button>
+  </fieldset>
+</form>
+
+<figure
+  style="
+    max-height: min(80dvh, 600px);
+    overflow-y: auto;
+    box-sizing: border-box;
+  "
+>
+  <div
+    class="full"
+    style="overflow-x: hidden; margin: 0px; box-sizing: border-box"
+  >
+    <table
+      class="full"
+      style="
+        min-height: fit-content;
+        height: fit-content;
+        box-sizing: border-box;
+      "
+    >
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nickname</th>
+          <th>Team</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="players-list"></tbody>
+    </table>
+    <p style="text-align: center; padding-top: 1.5rem" id="players-message">
+      Loading players...
+    </p>
+  </div>
+</figure>
+
+<h2>Teams</h2>
+
+<form id="team-create-form">
+  <fieldset>
+    <legend>Create a Team</legend>
+    <p>
+      <label for="teamname">Team Name</label>
+      <input
+        class="full"
+        id="teamname"
+        type="text"
+        placeholder="Enter team name"
+      />
+    </p>
+    <p>
+      <label for="masterPid">Master Player ID</label>
+      <input
+        class="full"
+        id="masterPid"
+        type="text"
+        placeholder="Enter master player ID"
+      />
+    </p>
+    <button class="full" id="create-team-button">Create Team</button>
+  </fieldset>
+</form>
+
+<figure
+  style="
+    max-height: min(80dvh, 600px);
+    overflow-y: auto;
+    box-sizing: border-box;
+  "
+>
+  <div
+    class="full"
+    style="overflow-x: hidden; margin: 0px; box-sizing: border-box"
+  >
+    <table
+      class="full"
+      style="
+        min-height: fit-content;
+        height: fit-content;
+        box-sizing: border-box;
+      "
+    >
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Master PID</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="team-list"></tbody>
+    </table>
+    <p style="text-align: center; padding-top: 1.5rem" id="team-message">
+      Loading teams...
+    </p>
+  </div>
+</figure>
 
 <div style="display: none" id="dev">
   <h2>Dev Pannel</h2>

@@ -9,20 +9,29 @@ import org.bukkit.event.player.PlayerJoinEvent
 import java.util.zip.CRC32
 
 class Whitelist(val spironus: Spironus) : Listener {
-    val kv = KVDB(spironus)
+    val kv = spironus.kvdb
     @EventHandler
     fun onPlayerJoin(event: PlayerJoinEvent) {
         val player = event.player
-        val playeridStr = player.uniqueId.toString()
+        val playerStr = player.uniqueId.toString()
         val crcid = CRC32().apply {
-            update(playeridStr.toByteArray())
+            update(playerStr.toByteArray())
         }.value.toString(36)
-        if (!kv.has("whitelist.$crcid")) {
+        if (!kv.has("whitelist", crcid)) {
             player.kick(
                 Component.text("등록되지 않은 플레이어 입니다.\nPID : ")
                     .append { Component.text("$crcid\n", NamedTextColor.YELLOW) }
                     .append(Component.text("위 ID를 국가의 권력가 혹은 관리자에게 제출하여 서버 입장을 허가받으시오."))
             )
         }
+
+        if(!kv.has("playerinfo-crc2uuid", crcid))
+            kv.set("playerinfo-crc2uuid", crcid, player.uniqueId.toString())
+        if(!kv.has("playerinfo-uuid2crc", player.uniqueId.toString()))
+            kv.set("playerinfo-uuid2crc", player.uniqueId.toString(), crcid)
+        if(!kv.has("playerinfo-team", crcid))
+            kv.set("playerinfo-team", crcid, "-1")
+
+        kv.set("playerinfo-nickname", crcid, player.name)
     }
 }

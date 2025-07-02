@@ -2,6 +2,7 @@ package kr.oein.spironus
 
 import kr.oein.interchest.GUIListener
 import kr.oein.interchest.GUIManager
+import kr.oein.spironus.components.KVDB
 import kr.oein.spironus.components.Whitelist
 import kr.oein.spironus.web.WebServer
 import org.bukkit.Bukkit
@@ -9,10 +10,13 @@ import org.bukkit.plugin.java.JavaPlugin
 
 
 class Spironus : JavaPlugin() {
+    var kvdb = KVDB(this)
+
     val guiManager = GUIManager()
     val guiListener = GUIListener(guiManager)
     val webServer = WebServer(this)
     override fun onEnable() {
+
         Bukkit.getPluginManager().registerEvents(guiListener, this)
         Bukkit.getPluginManager().registerEvents(Whitelist(this), this)
 
