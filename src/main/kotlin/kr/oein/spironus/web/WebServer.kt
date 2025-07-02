@@ -3,8 +3,8 @@ package kr.oein.spironus.web
 import io.javalin.Javalin
 import io.javalin.http.servlet.JavalinServletContext
 import kr.oein.spironus.Spironus
+import kr.oein.spironus.components.Random
 import java.util.Timer
-import java.util.UUID
 import kotlin.collections.forEach
 
 class WebServer(val spironus: Spironus) {
@@ -188,7 +188,7 @@ class WebServer(val spironus: Spironus) {
             val teamName = ctx.queryParam("name")
             val masterPID = ctx.queryParam("masterPid")
             if (teamName != null && teamName.isNotEmpty() && masterPID != null && masterPID.isNotEmpty()) {
-                var uuid = UUID.randomUUID().toString()
+                var uuid = Random().generate()
                 val teamsScope = kvdb.loadScope("teams")
 
                 // check for PID existence
@@ -198,7 +198,7 @@ class WebServer(val spironus: Spironus) {
                 }
 
                 while (teamsScope.has(uuid))
-                    uuid = UUID.randomUUID().toString()
+                    uuid = Random().generate()
 
                 val teamConfig = teamsScope.yamlcfg.createSection(uuid)
                 teamConfig.set("name", teamName)
