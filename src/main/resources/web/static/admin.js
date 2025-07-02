@@ -183,6 +183,22 @@ const lib = {
       }
     },
   },
+
+  server: {
+    reload: async () => {
+      if (isLocalTest) return;
+      const response = await fetch(`/adminapi/reload?token=${token}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (!response.ok) {
+        throw new Error("Failed to reload server");
+      }
+      return response.text();
+    },
+  },
 };
 
 (async () => {
@@ -492,6 +508,24 @@ const lib = {
 
       switchToViewMode();
       teamList.appendChild(tr);
+    });
+  })();
+
+  // Reload server button
+  (() => {
+    const reloadButton = document.getElementById("reload-button");
+    reloadButton.addEventListener("click", () => {
+      if (!confirm("Are you sure you want to reload the server?")) return;
+      lib.server
+        .reload()
+        .then((message) => {
+          alert(message);
+          window.location.reload();
+        })
+        .catch((error) => {
+          console.error("Error reloading server:", error);
+          alert("Failed to reload server.");
+        });
     });
   })();
 })();

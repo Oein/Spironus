@@ -257,6 +257,11 @@ class WebServer(val spironus: Spironus) {
                 ctx.status(400).result("Bad Request: Missing or invalid team ID")
             }
         }
+
+        app.post("/adminapi/reload") { ctx ->
+            ctx.result("Server reload requested")
+            spironus.server.reload()
+        }
     }
 
     fun generateToken(): String {
