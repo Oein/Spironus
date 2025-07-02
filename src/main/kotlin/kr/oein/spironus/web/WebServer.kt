@@ -200,7 +200,10 @@ class WebServer(val spironus: Spironus) {
                 while (teamsScope.has(uuid))
                     uuid = UUID.randomUUID().toString()
 
-                teamsScope.set(uuid, mapOf("name" to teamName, "masterPid" to masterPID))
+                val teamConfig = teamsScope.yamlcfg.createSection(uuid)
+                teamConfig.set("name", teamName)
+                teamConfig.set("masterPid", masterPID)
+                teamsScope.save()
             } else {
                 ctx.status(400).result("Bad Request: Missing or invalid team name")
             }
@@ -212,6 +215,11 @@ class WebServer(val spironus: Spironus) {
                 val teamsScope = kvdb.loadScope("teams")
                 if (teamsScope.has(teamId)) {
                     teamsScope.remove(teamId)
+                    // set all players in this team to -1
+                    val playersInTeam = kvdb.keys("playerinfo-team").filter { kvdb.get("playerinfo-team", it) == teamId }
+                    playersInTeam.forEach { pid ->
+                        kvdb.set("playerinfo-team", pid, "-1")
+                    }
                     ctx.result("Team with ID $teamId deleted")
                 } else {
                     ctx.status(404).result("Team not found with ID: $teamId")
