@@ -385,6 +385,8 @@ const lib = {
       tr.appendChild(td3);
 
       const td4 = document.createElement("td");
+      td4.style.minWidth = "max-content";
+      td4.style.width = "max-content";
       tr.appendChild(td4);
 
       const switchToViewMode = () => {
