@@ -21,7 +21,8 @@ class Whitelist(val spironus: Spironus) : Listener {
             player.kick(
                 Component.text("등록되지 않은 플레이어 입니다.\nPID : ")
                     .append { Component.text("$crcid\n", NamedTextColor.YELLOW) }
-                    .append(Component.text("위 ID를 국가의 권력가 혹은 관리자에게 제출하여 서버 입장을 허가받으시오."))
+                    .append { Component.text("위 ID를 국가의 권력가 혹은 관리자에게 제출하여 서버 입장 허가를 받으세요.\n") }
+                    .append { Component.text("위 코드가 노출될 경우, 서버 데이터 삭제, 원치않는 국가 소속등 불상사가 있을 수 있으니 주의하세요.", NamedTextColor.RED) }
             )
         }
 
