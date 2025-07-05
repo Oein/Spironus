@@ -15,13 +15,14 @@ repositories {
     maven("https://oss.sonatype.org/content/groups/public/") {
         name = "sonatype"
     }
+    maven("https://repo.codemc.org/repository/maven-public/")
 }
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("io.javalin:javalin:6.7.0")
-    implementation("dev.jorel:commandapi-bukkit-kotlin:9.3.0")
+    compileOnly("dev.jorel:commandapi-bukkit-core:10.1.0")
 }
 
 tasks {
