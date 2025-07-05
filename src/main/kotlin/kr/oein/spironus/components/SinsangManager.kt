@@ -18,4 +18,27 @@ class SinsangManager(val spironus: Spironus) {
         sinsangs[sinsang.uuid] = sinsang
         sinsang.save()
     }
+
+    fun damage(uuid: String, amount: Double) {
+        val sinsang = sinsangs[uuid]
+        if (sinsang != null) {
+            sinsang.damage(amount)
+        } else {
+            spironus.logger.warning("Sinsang with UUID $uuid not found.")
+        }
+    }
+
+    fun isDead(uuid: String): Boolean {
+        val sinsang = sinsangs[uuid]
+        return sinsang?.isDead() ?: true
+    }
+
+    fun setHealth(uuid: String, health: Double) {
+        val sinsang = sinsangs[uuid]
+        if (sinsang != null) {
+            sinsang.setHealth(health)
+        } else {
+            spironus.logger.warning("Sinsang with UUID $uuid not found.")
+        }
+    }
 }

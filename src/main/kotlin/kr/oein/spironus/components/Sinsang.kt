@@ -9,6 +9,7 @@ import java.util.UUID
 class Sinsang(val uuid: String, val spironus: Spironus) {
     var shulkers = mutableListOf<LivingEntity>()
     var blockDisplay: BlockDisplay? = null
+    var health = 10000.0
 
     public fun save() {
         val scope = spironus.kvdb.loadScope("sinsang")
@@ -56,5 +57,17 @@ class Sinsang(val uuid: String, val spironus: Spironus) {
                 }
             }
         }
+    }
+
+    public fun damage(amount: Double) {
+        this.health -= amount
+    }
+
+    public fun isDead(): Boolean {
+        return this.health <= 0
+    }
+
+    public fun setHealth(health: Double) {
+        this.health = health
     }
 }
