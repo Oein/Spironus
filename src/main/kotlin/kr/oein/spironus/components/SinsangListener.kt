@@ -23,6 +23,7 @@ class SinsangListener(val spironus: Spironus): Listener {
 
             if(event.cause == EntityDamageEvent.DamageCause.ENTITY_SWEEP_ATTACK) return
             spironus.server.broadcast(Component.text("[신상] ${sinsangUUID}이(가) ${event.cause.toString()}로 인해 ${event.damage}의 피해를 입었습니다."))
+            spironus.sinsangManager.damage(sinsangUUID, event.damage)
         }
     }
 
