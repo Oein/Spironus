@@ -19,24 +19,10 @@ class SinsangManager(val spironus: Spironus) {
         sinsang.save()
     }
 
-    fun damage(uuid: String, amount: Double) {
+    fun damage(uuid: String, amount: Double, team: String) {
         val sinsang = sinsangs[uuid]
         if (sinsang != null) {
-            sinsang.damage(amount)
-        } else {
-            spironus.logger.warning("Sinsang with UUID $uuid not found.")
-        }
-    }
-
-    fun isDead(uuid: String): Boolean {
-        val sinsang = sinsangs[uuid]
-        return sinsang?.isDead() ?: true
-    }
-
-    fun setHealth(uuid: String, health: Double) {
-        val sinsang = sinsangs[uuid]
-        if (sinsang != null) {
-            sinsang.setHealth(health)
+            sinsang.damage(amount, team)
         } else {
             spironus.logger.warning("Sinsang with UUID $uuid not found.")
         }

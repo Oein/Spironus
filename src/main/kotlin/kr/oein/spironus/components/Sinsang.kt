@@ -9,7 +9,8 @@ import java.util.UUID
 class Sinsang(val uuid: String, val spironus: Spironus) {
     var shulkers = mutableListOf<LivingEntity>()
     var blockDisplay: BlockDisplay? = null
-    var health = 10000.0
+    var health: Double = 10000.0
+    var owner = "-1"
 
     public fun save() {
         val scope = spironus.kvdb.loadScope("sinsang")
@@ -26,6 +27,8 @@ class Sinsang(val uuid: String, val spironus: Spironus) {
         for (i in uuids.indices) {
             shulkersSec.set("$i", uuids[i])
         }
+        section.set("owner", owner)
+        section.set("health", health)
 
         scope.save()
     }
@@ -57,17 +60,20 @@ class Sinsang(val uuid: String, val spironus: Spironus) {
                 }
             }
         }
+
+        owner = section.getString("owner")?: "-1"
+        health = section.getDouble("health", 10000.0)
     }
 
-    public fun damage(amount: Double) {
+    var lastDamagedTeam = "-1"
+
+    public fun damage(amount: Double, team: String) {
         this.health -= amount
-    }
+        this.lastDamagedTeam = team
 
-    public fun isDead(): Boolean {
-        return this.health <= 0
-    }
-
-    public fun setHealth(health: Double) {
-        this.health = health
+        if(this.health <= 0) {
+            this.health = 10000.0
+            spironus.logger.info("Sinsang $uuid has been destroyed.")
+        }
     }
 }
