@@ -8,6 +8,7 @@ import kr.oein.spironus.components.Chat
 import kr.oein.spironus.components.KVDB
 import kr.oein.spironus.components.Random
 import kr.oein.spironus.components.Sinsang
+import kr.oein.spironus.components.SinsangListener
 import kr.oein.spironus.components.SinsangManager
 import kr.oein.spironus.components.Whitelist
 import kr.oein.spironus.web.WebServer
@@ -42,6 +43,7 @@ class Spironus : JavaPlugin() {
         Bukkit.getPluginManager().registerEvents(guiListener, this)
         Bukkit.getPluginManager().registerEvents(Whitelist(this), this)
         Bukkit.getPluginManager().registerEvents(Chat(this), this)
+        Bukkit.getPluginManager().registerEvents(SinsangListener(this), this)
 
         saveDefaultConfig()
         config.get("listen") ?.let {
