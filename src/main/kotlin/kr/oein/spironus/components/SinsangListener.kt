@@ -23,7 +23,7 @@ class SinsangListener(val spironus: Spironus): Listener {
             if (sinsangUUID == null) return
             len.heal(event.damage)
 
-            if(event.cause == EntityDamageEvent.DamageCause.ENTITY_SWEEP_ATTACK) return
+            if(event.cause != EntityDamageEvent.DamageCause.ENTITY_ATTACK && event.cause != EntityDamageEvent.DamageCause.PROJECTILE) return
             val hitBy = event.damageSource
             if (hitBy.causingEntity is Player) {
                 val player = hitBy.causingEntity as Player

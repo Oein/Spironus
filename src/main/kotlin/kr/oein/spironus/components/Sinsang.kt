@@ -1,6 +1,8 @@
 package kr.oein.spironus.components
 
 import kr.oein.spironus.Spironus
+import net.kyori.adventure.bossbar.BossBar
+import net.kyori.adventure.text.Component
 import org.bukkit.entity.BlockDisplay
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Shulker
@@ -11,6 +13,12 @@ class Sinsang(val uuid: String, val spironus: Spironus) {
     var blockDisplay: BlockDisplay? = null
     var health: Double = 10000.0
     var owner = "-1"
+
+    var locX: Double = 0.0
+    var locY: Double = 0.0
+    var locZ: Double = 0.0
+
+    var bossbar = BossBar.bossBar(Component.text("신상"), 1.0f, BossBar.Color.PURPLE, BossBar.Overlay.NOTCHED_20)
 
     public fun save() {
         val scope = spironus.kvdb.loadScope("sinsang")
@@ -29,6 +37,9 @@ class Sinsang(val uuid: String, val spironus: Spironus) {
         }
         section.set("owner", owner)
         section.set("health", health)
+        section.set("locX", locX)
+        section.set("locY", locY)
+        section.set("locZ", locZ)
 
         scope.save()
     }
@@ -63,6 +74,9 @@ class Sinsang(val uuid: String, val spironus: Spironus) {
 
         owner = section.getString("owner")?: "-1"
         health = section.getDouble("health", 10000.0)
+        locX = section.getDouble("locX", 0.0)
+        locY = section.getDouble("locY", 0.0)
+        locZ = section.getDouble("locZ", 0.0)
     }
 
     var lastDamagedTeam = "-1"
@@ -75,5 +89,18 @@ class Sinsang(val uuid: String, val spironus: Spironus) {
             this.health = 10000.0
             spironus.logger.info("Sinsang $uuid has been destroyed.")
         }
+
+        bossbar.progress((this.health / 10000.0).toFloat())
+    }
+
+    public fun destroy() {
+        blockDisplay?.remove()
+        for (shulker in shulkers) {
+            shulker.remove()
+        }
+        spironus.sinsangManager.sinsangs.remove(uuid)
+        spironus.kvdb.loadScope("sinsang").yamlcfg.set(uuid, null)
+        spironus.kvdb.loadScope("sinsang").save()
+        spironus.logger.info("Sinsang $uuid has been destroyed and removed from storage.")
     }
 }
