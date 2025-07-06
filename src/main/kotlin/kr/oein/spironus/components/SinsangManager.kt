@@ -9,6 +9,7 @@ class SinsangManager(val spironus: Spironus) {
     val sinsangs = mutableMapOf<String, Sinsang>()
     val scope = spironus.kvdb.loadScope("sinsang")
 
+
     fun load() {
         scope.yamlcfg.getKeys(false).forEach { uuid ->
             val sinsang = Sinsang(uuid, spironus)
@@ -122,9 +123,7 @@ class SinsangManager(val spironus: Spironus) {
 
         spironus.server.scheduler.scheduleSyncRepeatingTask(spironus, {
             for(sinsang in sinsangs.values) {
-                spironus.logger.info { "Teleport $sinsang" }
                 for(shulker in sinsang.shulkers) {
-                    spironus.logger.info { "Teleport $shulker" }
                     shulker.teleport(
                         Location(
                             shulker.location.world,

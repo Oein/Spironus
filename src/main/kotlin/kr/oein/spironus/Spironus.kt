@@ -4,6 +4,7 @@ import kr.oein.interchest.GUIListener
 import kr.oein.interchest.GUIManager
 import kr.oein.spironus.components.Chat
 import kr.oein.spironus.components.KVDB
+import kr.oein.spironus.components.Tablist
 
 import kr.oein.spironus.components.SinsangListener
 import kr.oein.spironus.components.SinsangManageCommand
@@ -22,12 +23,14 @@ class Spironus : JavaPlugin() {
     val guiListener = GUIListener(guiManager)
     val sinsangManager = SinsangManager(this)
     val webServer = WebServer(this)
+    val tablistManager = Tablist(this)
     
     override fun onEnable() {
         Bukkit.getPluginManager().registerEvents(guiListener, this)
         Bukkit.getPluginManager().registerEvents(Whitelist(this), this)
         Bukkit.getPluginManager().registerEvents(Chat(this), this)
         Bukkit.getPluginManager().registerEvents(SinsangListener(this), this)
+        Bukkit.getPluginManager().registerEvents(tablistManager, this)
 
         saveDefaultConfig()
         config.get("listen") ?.let {
@@ -41,6 +44,7 @@ class Spironus : JavaPlugin() {
 
         sinsangManager.load()
         sinsangManager.schedule()
+        tablistManager.schedule()
     }
 
     val sinsangManageCommand = SinsangManageCommand(this)
