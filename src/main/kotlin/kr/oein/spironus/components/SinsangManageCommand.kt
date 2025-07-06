@@ -1,7 +1,9 @@
 package kr.oein.spironus.components
 
 import dev.jorel.commandapi.CommandAPICommand
+import dev.jorel.commandapi.arguments.IntegerArgument
 import dev.jorel.commandapi.arguments.ListArgumentBuilder
+import dev.jorel.commandapi.arguments.StringArgument
 import dev.jorel.commandapi.executors.CommandExecutor
 import kr.oein.spironus.Spironus
 import net.kyori.adventure.text.Component
@@ -37,7 +39,8 @@ class SinsangManageCommand(val spironus: Spironus) {
                 CommandAPICommand("sinsang")
                     .withSubcommands(
                         CommandAPICommand("spawn")
-                            .executes(CommandExecutor { sender, _ ->
+                            .withArguments(StringArgument("name"))
+                            .executes(CommandExecutor { sender, args ->
                                 if(sender !is Player) {
                                     sender.sendMessage(Component.text("You can't use this command!", NamedTextColor.RED))
                                     return@CommandExecutor
@@ -46,6 +49,12 @@ class SinsangManageCommand(val spironus: Spironus) {
                                 val player = sender
                                 if(!player.isOp) {
                                     player.sendMessage(Component.text("You don't have permission to use this command!", NamedTextColor.DARK_RED))
+                                    return@CommandExecutor
+                                }
+
+                                val name = args.get("name") as String
+                                if(name.isBlank()) {
+                                    player.sendMessage(Component.text("Name cannot be empty!", NamedTextColor.RED))
                                     return@CommandExecutor
                                 }
 
@@ -130,6 +139,9 @@ class SinsangManageCommand(val spironus: Spironus) {
                                 sinsang.locX = origLoc.x
                                 sinsang.locY = origLoc.y
                                 sinsang.locZ = origLoc.z
+                                sinsang.name = name
+
+                                sinsang.updateBossbarTitle()
 
                                 sinsangManager.add(sinsang)
                             }),
@@ -190,6 +202,52 @@ class SinsangManageCommand(val spironus: Spironus) {
                                             )
                                         )
                                     }
+                                }
+                            }),
+                        CommandAPICommand("heal")
+                            .withArguments(IntegerArgument("amount"))
+                            .withArguments(sinsangListArgu)
+                            .executes(CommandExecutor { sender, args ->
+                                if(sender !is Player) {
+                                    sender.sendMessage(Component.text("You can't use this command!", NamedTextColor.RED))
+                                    return@CommandExecutor
+                                }
+
+                                val player = sender
+                                if(!player.isOp) {
+                                    player.sendMessage(Component.text("You don't have permission to use this command!", NamedTextColor.DARK_RED))
+                                    return@CommandExecutor
+                                }
+
+                                val amount = args.get("amount") as Int
+                                for(uid in args.get("uid") as List<String>) {
+                                    sinsangManager.heal(uid, amount.toDouble())
+                                    player.sendMessage(
+                                        Component.text("Sinsang $uid has been healed by $amount.", NamedTextColor.GREEN)
+                                    )
+                                }
+                            }),
+                        CommandAPICommand("damage")
+                            .withArguments(IntegerArgument("amount"))
+                            .withArguments(sinsangListArgu)
+                            .executes(CommandExecutor { sender, args ->
+                                if(sender !is Player) {
+                                    sender.sendMessage(Component.text("You can't use this command!", NamedTextColor.RED))
+                                    return@CommandExecutor
+                                }
+
+                                val player = sender
+                                if(!player.isOp) {
+                                    player.sendMessage(Component.text("You don't have permission to use this command!", NamedTextColor.DARK_RED))
+                                    return@CommandExecutor
+                                }
+
+                                val amount = args.get("amount") as Int
+                                for(uid in args.get("uid") as List<String>) {
+                                    sinsangManager.damage(uid, amount.toDouble())
+                                    player.sendMessage(
+                                        Component.text("Sinsang $uid has been damaged by $amount.", NamedTextColor.GREEN)
+                                    )
                                 }
                             })
                     )

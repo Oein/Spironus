@@ -31,7 +31,25 @@ class SinsangManager(val spironus: Spironus) {
         }
     }
 
-    public fun destroy(uuid: String) {
+    fun damage(uuid: String, amount: Double) {
+        val sinsang = sinsangs[uuid]
+        if (sinsang != null) {
+            sinsang.damage(amount)
+        } else {
+            spironus.logger.warning("Sinsang with UUID $uuid not found.")
+        }
+    }
+
+    fun heal(uuid: String, amount: Double) {
+        val sinsang = sinsangs[uuid]
+        if (sinsang != null) {
+            sinsang.heal(amount)
+        } else {
+            spironus.logger.warning("Sinsang with UUID $uuid not found.")
+        }
+    }
+
+    fun destroy(uuid: String) {
         val sinsang = sinsangs[uuid]
         if (sinsang != null) {
             sinsang.destroy()
@@ -63,8 +81,10 @@ class SinsangManager(val spironus: Spironus) {
 
                 if(minDist < 150 && closestSinsang != null) {
                     player.showBossBar(closestSinsang.bossbar)
-                } else {
-                    for(sinsnags in sinsangs.values) {
+                }
+
+                for(sinsnags in sinsangs.values) {
+                    if(sinsnags.uuid != closestSinsang?.uuid) {
                         player.hideBossBar(sinsnags.bossbar)
                     }
                 }
