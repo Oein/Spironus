@@ -15,7 +15,10 @@ import org.bukkit.entity.BlockDisplay
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
+import org.bukkit.entity.Slime
 import org.bukkit.persistence.PersistentDataType
+import org.bukkit.potion.PotionEffect
+import org.bukkit.potion.PotionEffectType
 import org.bukkit.util.Transformation
 import org.joml.AxisAngle4f
 import org.joml.Vector3f
@@ -23,13 +26,7 @@ import kotlin.math.floor
 
 class SinsangManageCommand(val spironus: Spironus) {
     val sinsangManager = spironus.sinsangManager
-    val sinsangSize = 5
-
-    init {
-        if(sinsangSize % 2 == 0) {
-            throw IllegalArgumentException("SinsangManager (sinsangSize) must be an odd number.")
-        }
-    }
+    val sinsangSize = 4
 
     fun registerCommands() {
         val sinsangListArgu = ListArgumentBuilder<String>("uid")
@@ -76,68 +73,31 @@ class SinsangManageCommand(val spironus: Spironus) {
                                 val origLoc = loc.clone()
                                 val world = player.world
 
-                                val shulkers: MutableList<LivingEntity> = mutableListOf()
-
-                                var dx = intArrayOf()
-
-                                for (i in -sinsangSize / 2 until sinsangSize / 2 + 1) {
-                                    dx += i
-                                }
-
-                                val dy = dx.map { it -> it + 2 }
-                                val dz = dx
-
                                 val sinsangUUID_Key = NamespacedKey("spironus", "ss_uuid")
-                                val sinsangX_Key = NamespacedKey("spironus", "ss_x")
-                                val sinsangY_Key = NamespacedKey("spironus", "ss_y")
-                                val sinsangZ_Key = NamespacedKey("spironus", "ss_z")
 
                                 val sinsangUUID = Random().generate()
 
-                                for (x in dx) {
-                                    for (y in dy) {
-                                        for (z in dz) {
-                                            // Spawn shulkers in a 3x3x3 area around the player
-                                            val newLoc = loc.clone().add(x.toDouble(), y.toDouble(), z.toDouble())
-                                            val shulker = world.spawnEntity(newLoc, EntityType.SHULKER)
-                                            shulker.isCustomNameVisible = false
+                                // Spawn shulkers in a 3x3x3 area around the player
+                                val slime = world.spawnEntity(loc, EntityType.SLIME)
+                                slime.isCustomNameVisible = false
 
-                                            val lentity = shulker as LivingEntity
-                                            lentity.setAI(false)
-                                            lentity.isSilent = true
-                                            lentity.isCustomNameVisible = false
-                                            lentity.setGravity(false)
-                                            lentity.isInvisible = true
+                                val lentity = slime as Slime
+                                lentity.setAI(false)
+                                lentity.isSilent = true
+                                lentity.isCustomNameVisible = false
+                                lentity.setGravity(false)
+                                lentity.addPotionEffect(PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 0))
 
-                                            lentity.registerAttribute(Attribute.MAX_HEALTH)
-                                            lentity.getAttribute(Attribute.MAX_HEALTH)?.let { it.baseValue = 1000.0 }
-                                            lentity.health = 1000.0
+                                lentity.size = (sinsangSize * 2)
+                                lentity.registerAttribute(Attribute.MAX_HEALTH)
+                                lentity.getAttribute(Attribute.MAX_HEALTH)?.let { it.baseValue = 2048.0 }
+                                lentity.health = 2048.0
 
-                                            lentity.persistentDataContainer.set(
-                                                sinsangUUID_Key,
-                                                PersistentDataType.STRING,
-                                                sinsangUUID
-                                            )
-                                            lentity.persistentDataContainer.set(
-                                                sinsangX_Key,
-                                                PersistentDataType.INTEGER,
-                                                x + 1
-                                            )
-                                            lentity.persistentDataContainer.set(
-                                                sinsangY_Key,
-                                                PersistentDataType.INTEGER,
-                                                y
-                                            )
-                                            lentity.persistentDataContainer.set(
-                                                sinsangZ_Key,
-                                                PersistentDataType.INTEGER,
-                                                z
-                                            )
-
-                                            shulkers.add(shulker)
-                                        }
-                                    }
-                                }
+                                lentity.persistentDataContainer.set(
+                                    sinsangUUID_Key,
+                                    PersistentDataType.STRING,
+                                    sinsangUUID
+                                )
 
                                 loc.add(-floor(sinsangSize.toDouble() / 2) + 0.1, 0.1, -floor(sinsangSize.toDouble() / 2) + 0.1)
                                 val blockDisplay = world.spawnEntity(loc, EntityType.BLOCK_DISPLAY) as BlockDisplay
@@ -149,10 +109,15 @@ class SinsangManageCommand(val spironus: Spironus) {
                                     Vector3f(sinsangSize.toFloat() - 0.2f, sinsangSize.toFloat() - 0.2f, sinsangSize.toFloat() - 0.2f),
                                     AxisAngle4f()
                                 )
+                                blockDisplay.persistentDataContainer.set(
+                                    sinsangUUID_Key,
+                                    PersistentDataType.STRING,
+                                    sinsangUUID
+                                )
 
                                 val sinsang = Sinsang(sinsangUUID, spironus)
                                 sinsang.blockDisplay = blockDisplay
-                                sinsang.shulkers = shulkers
+                                sinsang.shulkers = listOf(slime as LivingEntity).toMutableList()
                                 sinsang.locX = origLoc.x
                                 sinsang.locY = origLoc.y
                                 sinsang.locZ = origLoc.z
@@ -265,6 +230,34 @@ class SinsangManageCommand(val spironus: Spironus) {
                                     player.sendMessage(
                                         Component.text("Sinsang $uid has been damaged by $amount.", NamedTextColor.GREEN)
                                     )
+                                }
+                            }),
+                        CommandAPICommand("deleteAll")
+                            .executes(CommandExecutor { sender, _ ->
+                                if(sender !is Player) {
+                                    sender.sendMessage(Component.text("You can't use this command!", NamedTextColor.RED))
+                                    return@CommandExecutor
+                                }
+
+                                val player = sender
+                                if(!player.isOp) {
+                                    player.sendMessage(Component.text("You don't have permission to use this command!", NamedTextColor.DARK_RED))
+                                    return@CommandExecutor
+                                }
+
+                                sinsangManager.sinsangs.forEach { s ->
+                                    s.component2().destroy()
+                                }
+                                sinsangManager.sinsangs.clear()
+                                player.sendMessage(Component.text("All sinsangs have been deleted.", NamedTextColor.GREEN))
+
+                                // loop in all entity
+                                for(entity in player.world.entities) {
+                                    if (entity is Slime && entity.persistentDataContainer.has(NamespacedKey("spironus", "ss_uuid"))) {
+                                        entity.remove()
+                                    } else if (entity is BlockDisplay && entity.persistentDataContainer.has(NamespacedKey("spironus", "ss_uuid"))) {
+                                        entity.remove()
+                                    }
                                 }
                             })
                     )

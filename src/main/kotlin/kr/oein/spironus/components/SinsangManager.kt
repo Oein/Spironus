@@ -49,6 +49,15 @@ class SinsangManager(val spironus: Spironus) {
         }
     }
 
+    fun setLastHitterName(uuid: String, person: String) {
+        val sinsang = sinsangs[uuid]
+        if (sinsang != null) {
+            sinsang.setLastHitterName___(person)
+        } else {
+            spironus.logger.warning("Sinsang with UUID $uuid not found.")
+        }
+    }
+
     fun destroy(uuid: String) {
         val sinsang = sinsangs[uuid]
         if (sinsang != null) {
@@ -65,6 +74,19 @@ class SinsangManager(val spironus: Spironus) {
         return sqrt((loc1.x - x).pow(2.0) + (loc1.z - z).pow(2.0))
     }
 
+    fun glowPlayer(player: org.bukkit.entity.Player) {
+        player.addPotionEffect(
+            org.bukkit.potion.PotionEffect(
+                org.bukkit.potion.PotionEffectType.GLOWING,
+                2, // 5 seconds
+                1, // Level 1
+                false, // Ambient
+                false, // Particles
+                false // Show in action bar
+            )
+        )
+    }
+
     fun schedule() {
         spironus.server.scheduler.scheduleSyncRepeatingTask(spironus, {
             for(player in spironus.server.onlinePlayers) {
@@ -75,6 +97,16 @@ class SinsangManager(val spironus: Spironus) {
                     if (distance < 150) {
                         player.showBossBar(sinsang.bossbar)
                         shownSinsangs = shownSinsangs + sinsang.uuid
+                    }
+                    val crc = spironus.kvdb.get("playerinfo-uuid2crc", player.uniqueId.toString())
+
+                    if(distance < 20) {
+                        if(crc is String) {
+                            val team = spironus.kvdb.get("playerinfo-team", crc)
+                            if(team is String && team != "-1") {
+                                if(sinsang.owner != team) glowPlayer(player)
+                            } else glowPlayer(player)
+                        } else glowPlayer(player)
                     }
                 }
 

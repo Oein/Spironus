@@ -2,7 +2,10 @@ package kr.oein.spironus.components
 
 import kr.oein.spironus.Spironus
 import net.kyori.adventure.bossbar.BossBar
+import net.kyori.adventure.sound.Sound
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.title.Title
 import org.bukkit.entity.BlockDisplay
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Shulker
@@ -15,6 +18,8 @@ class Sinsang(val uuid: String, val spironus: Spironus) {
     var health: Double = DEFAULT_HEALTH
     var owner = "-1"
     var ownerTemaName = "미점령"
+
+    var lastHitterName = ""
 
     var locX: Double = 0.0
     var locY: Double = 0.0
@@ -97,6 +102,7 @@ class Sinsang(val uuid: String, val spironus: Spironus) {
             this.owner = this.lastDamagedTeam
             save()
             spironus.logger.info("Sinsang $uuid has been destroyed.")
+            onTaken(this.lastDamagedTeam)
         }
 
         bossbar.progress((this.health / DEFAULT_HEALTH).toFloat())
@@ -118,6 +124,24 @@ class Sinsang(val uuid: String, val spironus: Spironus) {
         spironus.logger.info("Sinsang $uuid has been destroyed and removed from storage.")
     }
 
+    fun onTaken(by: String) {
+        val teamName = spironus.kvdb.loadScope("teams").yamlcfg.getConfigurationSection(by)?.getString("name") ?: "Unknown Team"
+        spironus.server.broadcast(Component.text("신상 ${this.name}이(가) $teamName 팀에 의해 점령되었습니다."))
+        for(player in spironus.server.onlinePlayers) {
+            player.showTitle(
+                Title.title(Component.text("신상 ${this.name}이(가) $teamName 팀에 의해 점령되었습니다.").color(NamedTextColor.GREEN),
+                    Component.text("막타 : ${this.lastHitterName}").color(NamedTextColor.YELLOW))
+            )
+        }
+        for(world in spironus.server.worlds) {
+            world.playSound(
+                org.bukkit.Location(world, locX, locY, locZ),
+                org.bukkit.Sound.UI_TOAST_CHALLENGE_COMPLETE,
+                10000.0f, 1.0f
+            )
+        }
+    }
+
     fun updateBossbarTitle() {
         if(owner == "-1") {
             ownerTemaName = "미점령"
@@ -126,7 +150,12 @@ class Sinsang(val uuid: String, val spironus: Spironus) {
             val teamName = spironus.kvdb.loadScope("teams").yamlcfg.getConfigurationSection(owner)?.getString("name")
             ownerTemaName = teamName ?: "Unknown Team"
         }
-        bossbar.name(Component.text("[$ownerTemaName] $name (${this.health.toInt()} / $DEFAULT_HEALTH)"))
+
+        bossbar.name(
+            Component.text("[$ownerTemaName] ", NamedTextColor.AQUA)
+                .append { Component.text("$name ", NamedTextColor.GREEN) }
+                .append { Component.text("(${this.health.toInt()} / $DEFAULT_HEALTH)", NamedTextColor.RED) }
+        )
     }
 
     fun damage(amount: Double) {
@@ -136,9 +165,14 @@ class Sinsang(val uuid: String, val spironus: Spironus) {
             this.owner = this.lastDamagedTeam
             save()
             spironus.logger.info("Sinsang $uuid has been destroyed.")
+            onTaken(this.lastDamagedTeam)
         }
         bossbar.progress((this.health / DEFAULT_HEALTH).toFloat())
         updateBossbarTitle()
+    }
+
+    fun setLastHitterName___(name: String) {
+        this.lastHitterName = name
     }
 
     fun heal(amount: Double) {
