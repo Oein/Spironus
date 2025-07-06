@@ -116,7 +116,26 @@ class SinsangManager(val spironus: Spironus) {
                     }
                 }
             }
+
+
         }, 1, 1)
+
+        spironus.server.scheduler.scheduleSyncRepeatingTask(spironus, {
+            for(sinsang in sinsangs.values) {
+                spironus.logger.info { "Teleport $sinsang" }
+                for(shulker in sinsang.shulkers) {
+                    spironus.logger.info { "Teleport $shulker" }
+                    shulker.teleport(
+                        Location(
+                            shulker.location.world,
+                            sinsang.locX,
+                            sinsang.locY,
+                            sinsang.locZ
+                        )
+                    )
+                }
+            }
+        }, 20, 20)
     }
 
     fun onDisable() {

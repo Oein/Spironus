@@ -117,7 +117,7 @@ class SinsangManageCommand(val spironus: Spironus) {
 
                                 val sinsang = Sinsang(sinsangUUID, spironus)
                                 sinsang.blockDisplay = blockDisplay
-                                sinsang.shulkers = listOf(slime as LivingEntity).toMutableList()
+                                sinsang.shulkers = mutableListOf(slime)
                                 sinsang.locX = origLoc.x
                                 sinsang.locY = origLoc.y
                                 sinsang.locZ = origLoc.z
