@@ -7,14 +7,14 @@ import org.bukkit.entity.BlockDisplay
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Shulker
 import java.util.UUID
-import kotlin.math.floor
 
 class Sinsang(val uuid: String, val spironus: Spironus) {
+    val DEFAULT_HEALTH = 5000.0
     var shulkers = mutableListOf<LivingEntity>()
     var blockDisplay: BlockDisplay? = null
-    var health: Double = 10000.0
+    var health: Double = DEFAULT_HEALTH
     var owner = "-1"
-    var ownerTemaName = "신상"
+    var ownerTemaName = "미점령"
 
     var locX: Double = 0.0
     var locY: Double = 0.0
@@ -77,7 +77,7 @@ class Sinsang(val uuid: String, val spironus: Spironus) {
         }
 
         owner = section.getString("owner")?: "-1"
-        health = section.getDouble("health", 10000.0)
+        health = section.getDouble("health", DEFAULT_HEALTH)
         locX = section.getDouble("locX", 0.0)
         locY = section.getDouble("locY", 0.0)
         locZ = section.getDouble("locZ", 0.0)
@@ -93,13 +93,13 @@ class Sinsang(val uuid: String, val spironus: Spironus) {
         this.lastDamagedTeam = team
 
         if(this.health <= 0) {
-            this.health = 10000.0
+            this.health = DEFAULT_HEALTH
             this.owner = this.lastDamagedTeam
             save()
             spironus.logger.info("Sinsang $uuid has been destroyed.")
         }
 
-        bossbar.progress((this.health / 10000.0).toFloat())
+        bossbar.progress((this.health / DEFAULT_HEALTH).toFloat())
         updateBossbarTitle()
     }
 
@@ -120,33 +120,33 @@ class Sinsang(val uuid: String, val spironus: Spironus) {
 
     fun updateBossbarTitle() {
         if(owner == "-1") {
-            ownerTemaName = "신상"
+            ownerTemaName = "미점령"
         } else {
             spironus.logger.info { "Owner: $owner" }
             val teamName = spironus.kvdb.loadScope("teams").yamlcfg.getConfigurationSection(owner)?.getString("name")
             ownerTemaName = teamName ?: "Unknown Team"
         }
-        bossbar.name(Component.text("[$ownerTemaName] $name (${this.health.toInt()} / 10000)"))
+        bossbar.name(Component.text("[$ownerTemaName] $name (${this.health.toInt()} / $DEFAULT_HEALTH)"))
     }
 
     fun damage(amount: Double) {
         this.health -= amount
         if (this.health <= 0) {
-            this.health = 10000.0
+            this.health = DEFAULT_HEALTH
             this.owner = this.lastDamagedTeam
             save()
             spironus.logger.info("Sinsang $uuid has been destroyed.")
         }
-        bossbar.progress((this.health / 10000.0).toFloat())
+        bossbar.progress((this.health / DEFAULT_HEALTH).toFloat())
         updateBossbarTitle()
     }
 
     fun heal(amount: Double) {
         this.health += amount
-        if (this.health > 10000.0) {
-            this.health = 10000.0
+        if (this.health > DEFAULT_HEALTH) {
+            this.health = DEFAULT_HEALTH
         }
-        bossbar.progress((this.health / 10000.0).toFloat())
+        bossbar.progress((this.health / DEFAULT_HEALTH).toFloat())
         updateBossbarTitle()
     }
 }

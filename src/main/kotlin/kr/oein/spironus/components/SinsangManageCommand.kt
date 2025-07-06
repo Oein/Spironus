@@ -10,6 +10,7 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
+import org.bukkit.attribute.Attribute
 import org.bukkit.entity.BlockDisplay
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.LivingEntity
@@ -22,6 +23,13 @@ import kotlin.math.floor
 
 class SinsangManageCommand(val spironus: Spironus) {
     val sinsangManager = spironus.sinsangManager
+    val sinsangSize = 5
+
+    init {
+        if(sinsangSize % 2 == 0) {
+            throw IllegalArgumentException("SinsangManager (sinsangSize) must be an odd number.")
+        }
+    }
 
     fun registerCommands() {
         val sinsangListArgu = ListArgumentBuilder<String>("uid")
@@ -59,7 +67,7 @@ class SinsangManageCommand(val spironus: Spironus) {
                                 }
 
                                 val loc = player.location.clone()
-                                player.teleport(player.location.add(0.0, 4.0, 0.0))
+                                player.teleport(player.location.add(0.0, sinsangSize.toDouble() + 1.0, 0.0))
 
                                 loc.setRotation(0f, 0f)
                                 loc.x = floor(loc.x)
@@ -70,9 +78,14 @@ class SinsangManageCommand(val spironus: Spironus) {
 
                                 val shulkers: MutableList<LivingEntity> = mutableListOf()
 
-                                val dx = intArrayOf(-1, 0, 1)
-                                val dy = intArrayOf(0, 1, 2)
-                                val dz = intArrayOf(-1, 0, 1)
+                                var dx = intArrayOf()
+
+                                for (i in -sinsangSize / 2 until sinsangSize / 2 + 1) {
+                                    dx += i
+                                }
+
+                                val dy = dx.map { it -> it + 2 }
+                                val dz = dx
 
                                 val sinsangUUID_Key = NamespacedKey("spironus", "ss_uuid")
                                 val sinsangX_Key = NamespacedKey("spironus", "ss_x")
@@ -95,6 +108,10 @@ class SinsangManageCommand(val spironus: Spironus) {
                                             lentity.isCustomNameVisible = false
                                             lentity.setGravity(false)
                                             lentity.isInvisible = true
+
+                                            lentity.registerAttribute(Attribute.MAX_HEALTH)
+                                            lentity.getAttribute(Attribute.MAX_HEALTH)?.let { it.baseValue = 1000.0 }
+                                            lentity.health = 1000.0
 
                                             lentity.persistentDataContainer.set(
                                                 sinsangUUID_Key,
@@ -122,14 +139,14 @@ class SinsangManageCommand(val spironus: Spironus) {
                                     }
                                 }
 
-                                loc.add(-0.9, 0.1, -0.9)
+                                loc.add(-floor(sinsangSize.toDouble() / 2) + 0.1, 0.1, -floor(sinsangSize.toDouble() / 2) + 0.1)
                                 val blockDisplay = world.spawnEntity(loc, EntityType.BLOCK_DISPLAY) as BlockDisplay
-                                blockDisplay.block = Material.IRON_BLOCK.createBlockData()
+                                blockDisplay.block = Material.WHITE_CONCRETE.createBlockData()
 
                                 blockDisplay.transformation = Transformation(
                                     Vector3f(),
                                     AxisAngle4f(),
-                                    Vector3f(2.8f, 2.8f, 2.8f),
+                                    Vector3f(sinsangSize.toFloat() - 0.2f, sinsangSize.toFloat() - 0.2f, sinsangSize.toFloat() - 0.2f),
                                     AxisAngle4f()
                                 )
 

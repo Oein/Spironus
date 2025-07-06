@@ -68,23 +68,18 @@ class SinsangManager(val spironus: Spironus) {
     fun schedule() {
         spironus.server.scheduler.scheduleSyncRepeatingTask(spironus, {
             for(player in spironus.server.onlinePlayers) {
-                var minDist = Double.MAX_VALUE
-                var closestSinsang: Sinsang? = null
+                var shownSinsangs: List<String> = mutableListOf()
                 for (sinsang in sinsangs.values) {
                     val distance = dist(player.location, sinsang.locX,sinsang.locZ)
 
-                    if (distance < minDist) {
-                        minDist = distance
-                        closestSinsang = sinsang
+                    if (distance < 150) {
+                        player.showBossBar(sinsang.bossbar)
+                        shownSinsangs = shownSinsangs + sinsang.uuid
                     }
                 }
 
-                if(minDist < 150 && closestSinsang != null) {
-                    player.showBossBar(closestSinsang.bossbar)
-                }
-
                 for(sinsnags in sinsangs.values) {
-                    if(sinsnags.uuid != closestSinsang?.uuid) {
+                    if(sinsnags.uuid !in shownSinsangs) {
                         player.hideBossBar(sinsnags.bossbar)
                     }
                 }
