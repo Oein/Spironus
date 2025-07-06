@@ -43,7 +43,6 @@ class Spironus : JavaPlugin() {
         sinsangManager.schedule()
     }
 
-
     val sinsangManageCommand = SinsangManageCommand(this)
 
     override fun onLoad() {
