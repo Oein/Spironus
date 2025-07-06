@@ -111,6 +111,10 @@ class Sinsang(val uuid: String, val spironus: Spironus) {
         spironus.sinsangManager.sinsangs.remove(uuid)
         spironus.kvdb.loadScope("sinsang").yamlcfg.set(uuid, null)
         spironus.kvdb.loadScope("sinsang").save()
+
+        for(player in spironus.server.onlinePlayers)
+            player.hideBossBar(bossbar)
+
         spironus.logger.info("Sinsang $uuid has been destroyed and removed from storage.")
     }
 
