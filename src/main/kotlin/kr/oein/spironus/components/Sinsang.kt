@@ -7,20 +7,23 @@ import org.bukkit.entity.BlockDisplay
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Shulker
 import java.util.UUID
+import kotlin.math.floor
 
 class Sinsang(val uuid: String, val spironus: Spironus) {
     var shulkers = mutableListOf<LivingEntity>()
     var blockDisplay: BlockDisplay? = null
     var health: Double = 10000.0
     var owner = "-1"
+    var ownerTemaName = "신상"
 
     var locX: Double = 0.0
     var locY: Double = 0.0
     var locZ: Double = 0.0
 
-    var bossbar = BossBar.bossBar(Component.text("신상"), 1.0f, BossBar.Color.PURPLE, BossBar.Overlay.NOTCHED_20)
+    var name = "Unnamed"
+    var bossbar = BossBar.bossBar(Component.text("[$ownerTemaName] $name"), 1.0f, BossBar.Color.PURPLE, BossBar.Overlay.NOTCHED_20)
 
-    public fun save() {
+    fun save() {
         val scope = spironus.kvdb.loadScope("sinsang")
         var section = scope.yamlcfg.getConfigurationSection(uuid)
         if (section == null) {
@@ -40,11 +43,12 @@ class Sinsang(val uuid: String, val spironus: Spironus) {
         section.set("locX", locX)
         section.set("locY", locY)
         section.set("locZ", locZ)
+        section.set("name", name)
 
         scope.save()
     }
 
-    public fun load() {
+    fun load() {
         val scope = spironus.kvdb.loadScope("sinsang")
         val section = scope.yamlcfg.getConfigurationSection(uuid) ?: return
 
@@ -77,23 +81,29 @@ class Sinsang(val uuid: String, val spironus: Spironus) {
         locX = section.getDouble("locX", 0.0)
         locY = section.getDouble("locY", 0.0)
         locZ = section.getDouble("locZ", 0.0)
+        name = section.getString("name") ?: "Unnamed"
+
+        updateBossbarTitle()
     }
 
     var lastDamagedTeam = "-1"
 
-    public fun damage(amount: Double, team: String) {
+    fun damage(amount: Double, team: String) {
         this.health -= amount
         this.lastDamagedTeam = team
 
         if(this.health <= 0) {
             this.health = 10000.0
+            this.owner = this.lastDamagedTeam
+            save()
             spironus.logger.info("Sinsang $uuid has been destroyed.")
         }
 
         bossbar.progress((this.health / 10000.0).toFloat())
+        updateBossbarTitle()
     }
 
-    public fun destroy() {
+    fun destroy() {
         blockDisplay?.remove()
         for (shulker in shulkers) {
             shulker.remove()
@@ -102,5 +112,37 @@ class Sinsang(val uuid: String, val spironus: Spironus) {
         spironus.kvdb.loadScope("sinsang").yamlcfg.set(uuid, null)
         spironus.kvdb.loadScope("sinsang").save()
         spironus.logger.info("Sinsang $uuid has been destroyed and removed from storage.")
+    }
+
+    fun updateBossbarTitle() {
+        if(owner == "-1") {
+            ownerTemaName = "신상"
+        } else {
+            spironus.logger.info { "Owner: $owner" }
+            val teamName = spironus.kvdb.loadScope("teams").yamlcfg.getConfigurationSection(owner)?.getString("name")
+            ownerTemaName = teamName ?: "Unknown Team"
+        }
+        bossbar.name(Component.text("[$ownerTemaName] $name (${this.health.toInt()} / 10000)"))
+    }
+
+    fun damage(amount: Double) {
+        this.health -= amount
+        if (this.health <= 0) {
+            this.health = 10000.0
+            this.owner = this.lastDamagedTeam
+            save()
+            spironus.logger.info("Sinsang $uuid has been destroyed.")
+        }
+        bossbar.progress((this.health / 10000.0).toFloat())
+        updateBossbarTitle()
+    }
+
+    fun heal(amount: Double) {
+        this.health += amount
+        if (this.health > 10000.0) {
+            this.health = 10000.0
+        }
+        bossbar.progress((this.health / 10000.0).toFloat())
+        updateBossbarTitle()
     }
 }
