@@ -5,6 +5,7 @@ import kr.oein.interchest.GUIManager
 import kr.oein.spironus.components.Chat
 import kr.oein.spironus.components.KVDB
 import kr.oein.spironus.components.Random
+import kr.oein.spironus.components.ShiftF
 import kr.oein.spironus.components.Tablist
 
 import kr.oein.spironus.components.SinsangListener
@@ -32,6 +33,7 @@ class Spironus : JavaPlugin() {
         Bukkit.getPluginManager().registerEvents(guiListener, this)
         Bukkit.getPluginManager().registerEvents(Whitelist(this), this)
         Bukkit.getPluginManager().registerEvents(Chat(this), this)
+        Bukkit.getPluginManager().registerEvents(ShiftF(this), this)
         Bukkit.getPluginManager().registerEvents(SinsangListener(this), this)
         Bukkit.getPluginManager().registerEvents(tablistManager, this)
 
