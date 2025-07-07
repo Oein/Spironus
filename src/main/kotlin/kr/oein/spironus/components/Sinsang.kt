@@ -17,10 +17,10 @@ import org.bukkit.potion.PotionEffectType
 import java.util.UUID
 
 class Sinsang(val uuid: String, val spironus: Spironus) {
-    val DEFAULT_HEALTH = 5000.0
+    val confDefaultHealth = 5000.0
     var slime: LivingEntity? = null
     var blockDisplay: BlockDisplay? = null
-    var health: Double = DEFAULT_HEALTH
+    var health: Double = confDefaultHealth
     var owner = "-1"
     var ownerTemaName = "미점령"
 
@@ -63,7 +63,7 @@ class Sinsang(val uuid: String, val spironus: Spironus) {
         }
 
         owner = section.getString("owner")?: "-1"
-        health = section.getDouble("health", DEFAULT_HEALTH)
+        health = section.getDouble("health", confDefaultHealth)
         locX = section.getDouble("locX", 0.0)
         locY = section.getDouble("locY", 0.0)
         locZ = section.getDouble("locZ", 0.0)
@@ -79,14 +79,14 @@ class Sinsang(val uuid: String, val spironus: Spironus) {
         this.lastDamagedTeam = team
 
         if(this.health <= 0) {
-            this.health = DEFAULT_HEALTH
+            this.health = confDefaultHealth
             this.owner = this.lastDamagedTeam
             save()
             spironus.logger.info("Sinsang $uuid has been destroyed.")
             onTaken(this.lastDamagedTeam)
         }
 
-        bossbar.progress((this.health / DEFAULT_HEALTH).toFloat())
+        bossbar.progress((this.health / confDefaultHealth).toFloat())
         updateBossbarTitle()
     }
 
@@ -135,20 +135,20 @@ class Sinsang(val uuid: String, val spironus: Spironus) {
         bossbar.name(
             Component.text("[$ownerTemaName] ", NamedTextColor.AQUA)
                 .append { Component.text("$name ", NamedTextColor.GREEN) }
-                .append { Component.text("(${this.health.toInt()} / $DEFAULT_HEALTH)", NamedTextColor.RED) }
+                .append { Component.text("(${this.health.toInt()} / $confDefaultHealth)", NamedTextColor.RED) }
         )
     }
 
     fun damage(amount: Double) {
         this.health -= amount
         if (this.health <= 0) {
-            this.health = DEFAULT_HEALTH
+            this.health = confDefaultHealth
             this.owner = this.lastDamagedTeam
             save()
             spironus.logger.info("Sinsang $uuid has been destroyed.")
             onTaken(this.lastDamagedTeam)
         }
-        bossbar.progress((this.health / DEFAULT_HEALTH).toFloat())
+        bossbar.progress((this.health / confDefaultHealth).toFloat())
         updateBossbarTitle()
     }
 
@@ -158,10 +158,10 @@ class Sinsang(val uuid: String, val spironus: Spironus) {
 
     fun heal(amount: Double) {
         this.health += amount
-        if (this.health > DEFAULT_HEALTH) {
-            this.health = DEFAULT_HEALTH
+        if (this.health > confDefaultHealth) {
+            this.health = confDefaultHealth
         }
-        bossbar.progress((this.health / DEFAULT_HEALTH).toFloat())
+        bossbar.progress((this.health / confDefaultHealth).toFloat())
         updateBossbarTitle()
     }
 
@@ -188,15 +188,15 @@ class Sinsang(val uuid: String, val spironus: Spironus) {
             lentity.getAttribute(Attribute.MAX_HEALTH)?.let { it.baseValue = 2048.0 }
             lentity.health = 2048.0
 
-            val sinsangUUID_Key = NamespacedKey("spironus", "ss_uuid")
-            val sinsangSession_Key = NamespacedKey("spironus", "ss_session")
+            val sinsangUUIDKey = NamespacedKey("spironus", "ss_uuid")
+            val sinsangSessionKey = NamespacedKey("spironus", "ss_session")
             lentity.persistentDataContainer.set(
-                sinsangUUID_Key,
+                sinsangUUIDKey,
                 PersistentDataType.STRING,
                 uuid
             )
             lentity.persistentDataContainer.set(
-                sinsangSession_Key,
+                sinsangSessionKey,
                 PersistentDataType.STRING,
                 spironus.sessionID
             )
