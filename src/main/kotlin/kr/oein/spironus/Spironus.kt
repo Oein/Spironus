@@ -4,6 +4,7 @@ import kr.oein.interchest.GUIListener
 import kr.oein.interchest.GUIManager
 import kr.oein.spironus.components.Chat
 import kr.oein.spironus.components.KVDB
+import kr.oein.spironus.components.Random
 import kr.oein.spironus.components.Tablist
 
 import kr.oein.spironus.components.SinsangListener
@@ -24,6 +25,8 @@ class Spironus : JavaPlugin() {
     val sinsangManager = SinsangManager(this)
     val webServer = WebServer(this)
     val tablistManager = Tablist(this)
+
+    val sessionID = Random().generate()
     
     override fun onEnable() {
         Bukkit.getPluginManager().registerEvents(guiListener, this)

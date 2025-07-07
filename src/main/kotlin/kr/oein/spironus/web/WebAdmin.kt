@@ -246,7 +246,7 @@ class WebAdmin(val spironus: Spironus, val app: Javalin) {
         }
     }
 
-    public fun validateAdminToken(token: String): Boolean {
+    fun validateAdminToken(token: String): Boolean {
         return adminTokens.contains(token)
     }
 }

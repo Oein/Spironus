@@ -1,10 +1,8 @@
 package kr.oein.spironus.web
 
 import io.javalin.Javalin
-import io.javalin.http.servlet.JavalinServletContext
 import java.util.Timer
 import kr.oein.spironus.Spironus
-import kr.oein.spironus.components.Random
 
 class WebTeam(val spironus: Spironus, val app: Javalin) {
     val kvdb = spironus.kvdb
@@ -15,7 +13,7 @@ class WebTeam(val spironus: Spironus, val app: Javalin) {
         return java.util.UUID.randomUUID().toString()
     }
 
-    public fun issueTeamMasterToken(teamId: String): String {
+    fun issueTeamMasterToken(teamId: String): String {
         val token = generateToken()
         teamMasterTokens[token] = teamId
         val timer = Timer()
@@ -34,7 +32,7 @@ class WebTeam(val spironus: Spironus, val app: Javalin) {
      * @param token The team master token to validate.
      * @return The team ID if the token is valid, null otherwise.
      */
-    public fun validateTeamMasterToken(token: String): String? {
+    fun validateTeamMasterToken(token: String): String? {
         return teamMasterTokens[token]
     }
 }

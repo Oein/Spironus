@@ -1,8 +1,6 @@
 package kr.oein.spironus.components
 
 import kr.oein.spironus.Spironus
-import org.bukkit.configuration.file.YamlConfiguration
-import kotlin.io.path.Path
 
 class KVDB(val spironus: Spironus) {
     var scopes: MutableMap<String, KVDB_Scope> = mutableMapOf()

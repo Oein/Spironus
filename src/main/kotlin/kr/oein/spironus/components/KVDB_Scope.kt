@@ -2,7 +2,6 @@ package kr.oein.spironus.components
 
 import kr.oein.spironus.Spironus
 import org.bukkit.configuration.file.YamlConfiguration
-import kotlin.io.path.Path
 
 class KVDB_Scope(val spironus: Spironus, val scope: String) {
     var yamlcfg: YamlConfiguration = YamlConfiguration()

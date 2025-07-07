@@ -10,15 +10,11 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
-import org.bukkit.attribute.Attribute
 import org.bukkit.entity.BlockDisplay
 import org.bukkit.entity.EntityType
-import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 import org.bukkit.entity.Slime
 import org.bukkit.persistence.PersistentDataType
-import org.bukkit.potion.PotionEffect
-import org.bukkit.potion.PotionEffectType
 import org.bukkit.util.Transformation
 import org.joml.AxisAngle4f
 import org.joml.Vector3f
@@ -74,30 +70,7 @@ class SinsangManageCommand(val spironus: Spironus) {
                                 val world = player.world
 
                                 val sinsangUUID_Key = NamespacedKey("spironus", "ss_uuid")
-
                                 val sinsangUUID = Random().generate()
-
-                                // Spawn shulkers in a 3x3x3 area around the player
-                                val slime = world.spawnEntity(loc, EntityType.SLIME)
-                                slime.isCustomNameVisible = false
-
-                                val lentity = slime as Slime
-                                lentity.setAI(false)
-                                lentity.isSilent = true
-                                lentity.isCustomNameVisible = false
-                                lentity.setGravity(false)
-                                lentity.addPotionEffect(PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 0))
-
-                                lentity.size = (sinsangSize * 2)
-                                lentity.registerAttribute(Attribute.MAX_HEALTH)
-                                lentity.getAttribute(Attribute.MAX_HEALTH)?.let { it.baseValue = 2048.0 }
-                                lentity.health = 2048.0
-
-                                lentity.persistentDataContainer.set(
-                                    sinsangUUID_Key,
-                                    PersistentDataType.STRING,
-                                    sinsangUUID
-                                )
 
                                 loc.add(-floor(sinsangSize.toDouble() / 2) + 0.1, 0.1, -floor(sinsangSize.toDouble() / 2) + 0.1)
                                 val blockDisplay = world.spawnEntity(loc, EntityType.BLOCK_DISPLAY) as BlockDisplay
@@ -117,11 +90,11 @@ class SinsangManageCommand(val spironus: Spironus) {
 
                                 val sinsang = Sinsang(sinsangUUID, spironus)
                                 sinsang.blockDisplay = blockDisplay
-                                sinsang.shulkers = mutableListOf(slime)
                                 sinsang.locX = origLoc.x
                                 sinsang.locY = origLoc.y
                                 sinsang.locZ = origLoc.z
                                 sinsang.name = name
+                                sinsang.spawnSlime()
 
                                 sinsang.updateBossbarTitle()
 

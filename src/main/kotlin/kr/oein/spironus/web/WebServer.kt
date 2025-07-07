@@ -1,11 +1,7 @@
 package kr.oein.spironus.web
 
 import io.javalin.Javalin
-import io.javalin.http.servlet.JavalinServletContext
 import kr.oein.spironus.Spironus
-import kr.oein.spironus.components.Random
-import java.util.Timer
-import kotlin.collections.forEach
 
 class WebServer(val spironus: Spironus) {
     private val app: Javalin = Javalin.create { config ->
@@ -45,11 +41,11 @@ class WebServer(val spironus: Spironus) {
         }
     }
 
-    public fun start(port: Int) {
+    fun start(port: Int) {
         app.start(port)
     }
 
-    public fun stop() {
+    fun stop() {
         app.stop()
     }
 }

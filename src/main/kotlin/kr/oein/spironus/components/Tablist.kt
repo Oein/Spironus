@@ -13,17 +13,14 @@ import org.bukkit.event.player.PlayerJoinEvent
 class Tablist(val spironus: Spironus) : Listener {
     fun setPlayerPrefix(player: Player, prefix: String, suffix: String = "") {
         val scoreboard = Bukkit.getScoreboardManager().mainScoreboard
-        val teamName = "tab_${player.name.take(12)}" // 팀 이름은 최대 16자 제한
+        val teamName = "tab_${player.name.take(12)}"
 
-        // 기존 팀 있으면 제거하고 새로 생성
         scoreboard.getTeam(teamName)?.unregister()
         val team = scoreboard.registerNewTeam(teamName)
 
-        // prefix/suffix 설정 (Adventure Component 방식)
-        team.prefix(Component.text(prefix)) // 예: "[STAFF] "
+        team.prefix(Component.text(prefix))
         team.addEntry(player.name)
 
-        // 플레이어가 이 팀의 표시를 따르도록
         player.scoreboard = scoreboard
     }
     private fun updateTablist(player: Player) {
