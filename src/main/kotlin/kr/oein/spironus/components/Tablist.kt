@@ -11,14 +11,14 @@ import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
 
 class Tablist(val spironus: Spironus) : Listener {
-    fun setPlayerPrefix(player: Player, prefix: String, suffix: String = "") {
+    fun setPlayerPrefix(player: Player, prefix: String) {
         val scoreboard = Bukkit.getScoreboardManager().mainScoreboard
         val teamName = "tab_${player.name.take(12)}"
 
         scoreboard.getTeam(teamName)?.unregister()
         val team = scoreboard.registerNewTeam(teamName)
 
-        team.prefix(Component.text(prefix))
+        team.prefix(Component.text(prefix, NamedTextColor.AQUA))
         team.addEntry(player.name)
 
         player.scoreboard = scoreboard
@@ -46,7 +46,7 @@ class Tablist(val spironus: Spironus) : Listener {
                 .append { Component.text("님!        \n", NamedTextColor.WHITE) }
         val footer = Component.text("\n        당신의 팀 : [ $teamName ]       \n", NamedTextColor.AQUA)
         player.sendPlayerListHeaderAndFooter(header, footer)
-        setPlayerPrefix(player, "§b[ $teamName ] ", " §f")
+        setPlayerPrefix(player, "[ $teamName ] ")
     }
     @EventHandler
     fun onJoin(event: PlayerJoinEvent) {
