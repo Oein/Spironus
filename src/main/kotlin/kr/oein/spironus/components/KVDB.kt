@@ -3,11 +3,11 @@ package kr.oein.spironus.components
 import kr.oein.spironus.Spironus
 
 class KVDB(val spironus: Spironus) {
-    var scopes: MutableMap<String, KVDB_Scope> = mutableMapOf()
+    var scopes: MutableMap<String, KVDBScope> = mutableMapOf()
 
-    fun loadScope(scope: String): KVDB_Scope {
+    fun loadScope(scope: String): KVDBScope {
         if (scopes.containsKey(scope)) return scopes[scope]!!
-        return KVDB_Scope(spironus, scope).also {
+        return KVDBScope(spironus, scope).also {
             it.load()
             scopes[scope] = it
         }

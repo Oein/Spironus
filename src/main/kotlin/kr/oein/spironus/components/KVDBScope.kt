@@ -3,7 +3,7 @@ package kr.oein.spironus.components
 import kr.oein.spironus.Spironus
 import org.bukkit.configuration.file.YamlConfiguration
 
-class KVDB_Scope(val spironus: Spironus, val scope: String) {
+class KVDBScope(val spironus: Spironus, val scope: String) {
     var yamlcfg: YamlConfiguration = YamlConfiguration()
 
     fun load() {
