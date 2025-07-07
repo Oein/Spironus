@@ -55,7 +55,7 @@ class SinsangManager(val spironus: Spironus) {
     fun setLastHitterName(uuid: String, person: String) {
         val sinsang = sinsangs[uuid]
         if (sinsang != null) {
-            sinsang.setLastHitterName___(person)
+            sinsang.setLastAttackerName(person)
         } else {
             spironus.logger.warning("Sinsang with UUID $uuid not found.")
         }

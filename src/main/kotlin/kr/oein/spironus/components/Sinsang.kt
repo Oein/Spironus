@@ -74,17 +74,21 @@ class Sinsang(val uuid: String, val spironus: Spironus) {
 
     var lastDamagedTeam = "-1"
 
+    private fun checkDestroyed() {
+        if (health <= 0) {
+            health = confDefaultHealth
+            owner = lastDamagedTeam
+            save()
+            spironus.logger.info("Sinsang $uuid has been destroyed.")
+            onTaken(lastDamagedTeam)
+        }
+    }
+
     fun damage(amount: Double, team: String) {
         this.health -= amount
         this.lastDamagedTeam = team
 
-        if(this.health <= 0) {
-            this.health = confDefaultHealth
-            this.owner = this.lastDamagedTeam
-            save()
-            spironus.logger.info("Sinsang $uuid has been destroyed.")
-            onTaken(this.lastDamagedTeam)
-        }
+        checkDestroyed()
 
         bossbar.progress((this.health / confDefaultHealth).toFloat())
         updateBossbarTitle()
@@ -141,18 +145,12 @@ class Sinsang(val uuid: String, val spironus: Spironus) {
 
     fun damage(amount: Double) {
         this.health -= amount
-        if (this.health <= 0) {
-            this.health = confDefaultHealth
-            this.owner = this.lastDamagedTeam
-            save()
-            spironus.logger.info("Sinsang $uuid has been destroyed.")
-            onTaken(this.lastDamagedTeam)
-        }
+        checkDestroyed()
         bossbar.progress((this.health / confDefaultHealth).toFloat())
         updateBossbarTitle()
     }
 
-    fun setLastHitterName___(name: String) {
+    fun setLastAttackerName(name: String) {
         this.lastHitterName = name
     }
 
