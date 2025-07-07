@@ -2,6 +2,8 @@ package kr.oein.spironus.components
 
 import kr.oein.spironus.Spironus
 import org.bukkit.Location
+import org.bukkit.NamespacedKey
+import org.bukkit.entity.Slime
 import kotlin.math.pow
 import kotlin.math.sqrt
 
@@ -122,17 +124,34 @@ class SinsangManager(val spironus: Spironus) {
         }, 1, 1)
 
         spironus.server.scheduler.scheduleSyncRepeatingTask(spironus, {
-            for(sinsang in sinsangs.values) {
-                for(shulker in sinsang.shulkers) {
-                    shulker.teleport(
-                        Location(
-                            shulker.location.world,
-                            sinsang.locX,
-                            sinsang.locY,
-                            sinsang.locZ
-                        )
-                    )
+            for(entity in spironus.server.worlds.flatMap { it.entities }) {
+                if(entity !is Slime) continue
+                val sinsangUUIDKey = NamespacedKey("spironus", "ss_uuid")
+                val sinsangSessionKey = NamespacedKey("spironus", "ss_session")
+                if(entity.persistentDataContainer.has(sinsangUUIDKey)) {
+                    val sinsangUUID = entity.persistentDataContainer.get(sinsangUUIDKey, org.bukkit.persistence.PersistentDataType.STRING)
+                    if (sinsangUUID != null && sinsangs.containsKey(sinsangUUID)) {
+                        val sinsang = sinsangs[sinsangUUID]
+                        if(sinsang == null) {
+                            entity.remove()
+                        }
+                        if(entity.persistentDataContainer.has(sinsangSessionKey)) {
+                            val session = entity.persistentDataContainer.get(sinsangSessionKey, org.bukkit.persistence.PersistentDataType.STRING)
+                            if(session != spironus.sessionID) {
+                                entity.remove()
+                            }
+                        } else {
+                            entity.remove()
+                        }
+                        sinsang?.spawnSlime()
+                    } else {
+                        entity.remove()
+                    }
                 }
+            }
+
+            for(sinsang in sinsangs.values) {
+                sinsang.spawnSlime()
             }
         }, 20, 20)
     }

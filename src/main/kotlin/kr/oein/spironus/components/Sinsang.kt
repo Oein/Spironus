@@ -2,18 +2,23 @@ package kr.oein.spironus.components
 
 import kr.oein.spironus.Spironus
 import net.kyori.adventure.bossbar.BossBar
-import net.kyori.adventure.sound.Sound
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.title.Title
+import org.bukkit.NamespacedKey
+import org.bukkit.attribute.Attribute
 import org.bukkit.entity.BlockDisplay
+import org.bukkit.entity.EntityType
 import org.bukkit.entity.LivingEntity
-import org.bukkit.entity.Shulker
+import org.bukkit.entity.Slime
+import org.bukkit.persistence.PersistentDataType
+import org.bukkit.potion.PotionEffect
+import org.bukkit.potion.PotionEffectType
 import java.util.UUID
 
 class Sinsang(val uuid: String, val spironus: Spironus) {
     val DEFAULT_HEALTH = 5000.0
-    var shulkers = mutableListOf<LivingEntity>()
+    var slime: LivingEntity? = null
     var blockDisplay: BlockDisplay? = null
     var health: Double = DEFAULT_HEALTH
     var owner = "-1"
@@ -36,13 +41,7 @@ class Sinsang(val uuid: String, val spironus: Spironus) {
         }
         section = scope.yamlcfg.getConfigurationSection(uuid)!!
 
-        val uuids = shulkers.map { it.uniqueId.toString() }
         section.set("blockDisplay", blockDisplay?.uniqueId?.toString())
-        val shulkersSec = section.createSection("shulkers")
-        shulkersSec.set("length", uuids.size)
-        for (i in uuids.indices) {
-            shulkersSec.set("$i", uuids[i])
-        }
         section.set("owner", owner)
         section.set("health", health)
         section.set("locX", locX)
@@ -61,24 +60,6 @@ class Sinsang(val uuid: String, val spironus: Spironus) {
         if (blockDisplayUuid != null) {
             val blockUUID = UUID.fromString(blockDisplayUuid)
             blockDisplay = spironus.server.getEntity(blockUUID) as? BlockDisplay
-        }
-
-        val shulkersSec = section.getConfigurationSection("shulkers")
-        if (shulkersSec != null) {
-            val length = shulkersSec.getInt("length", 0)
-            for (i in 0 until length) {
-                val shulkerUuid = shulkersSec.getString("$i")
-                if (shulkerUuid != null) {
-                    val shulkerEntity = spironus.server.getEntity(UUID.fromString(shulkerUuid))
-                    if (shulkerEntity is Shulker) {
-                        shulkers.add(shulkerEntity)
-                    } else {
-                        spironus.logger.warning("Sinsang: Shulker with UUID $shulkerUuid not found or is not a Shulker entity.")
-                    }
-                } else {
-                    spironus.logger.warning("Sinsang: Shulker UUID at index $i is null.")
-                }
-            }
         }
 
         owner = section.getString("owner")?: "-1"
@@ -111,8 +92,8 @@ class Sinsang(val uuid: String, val spironus: Spironus) {
 
     fun destroy() {
         blockDisplay?.remove()
-        for (shulker in shulkers) {
-            shulker.remove()
+        if(slime is LivingEntity) {
+            slime!!.remove()
         }
         spironus.sinsangManager.sinsangs.remove(uuid)
         spironus.kvdb.loadScope("sinsang").yamlcfg.set(uuid, null)
@@ -182,5 +163,45 @@ class Sinsang(val uuid: String, val spironus: Spironus) {
         }
         bossbar.progress((this.health / DEFAULT_HEALTH).toFloat())
         updateBossbarTitle()
+    }
+
+    val sinsangSize = 4
+    fun spawnSlime() {
+        if (slime == null || slime!!.isDead) {
+            val world = spironus.server.worlds.firstOrNull() ?: return
+            val loc = org.bukkit.Location(
+                world,
+                locX, locY, locZ
+            )
+            val slime = world.spawnEntity(loc, EntityType.SLIME)
+            slime.isCustomNameVisible = false
+
+            val lentity = slime as Slime
+            lentity.setAI(false)
+            lentity.isSilent = true
+            lentity.isCustomNameVisible = false
+            lentity.setGravity(false)
+            lentity.addPotionEffect(PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 0))
+
+            lentity.size = (sinsangSize * 2)
+            lentity.registerAttribute(Attribute.MAX_HEALTH)
+            lentity.getAttribute(Attribute.MAX_HEALTH)?.let { it.baseValue = 2048.0 }
+            lentity.health = 2048.0
+
+            val sinsangUUID_Key = NamespacedKey("spironus", "ss_uuid")
+            val sinsangSession_Key = NamespacedKey("spironus", "ss_session")
+            lentity.persistentDataContainer.set(
+                sinsangUUID_Key,
+                PersistentDataType.STRING,
+                uuid
+            )
+            lentity.persistentDataContainer.set(
+                sinsangSession_Key,
+                PersistentDataType.STRING,
+                spironus.sessionID
+            )
+
+            this.slime = lentity
+        }
     }
 }
