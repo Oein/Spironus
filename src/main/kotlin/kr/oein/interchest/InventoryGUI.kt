@@ -19,7 +19,7 @@ abstract class InventoryGUI : InventoryHandler {
         this.buttonMap.put(slot, button)
     }
 
-    fun decorate(player: Player?) {
+    open fun decorate(player: Player?) {
         this.buttonMap.forEach { (slot: Int?, button: InventoryButton?) ->
             val icon = button!!.iconCreator!!.apply(player)
             this.inventory.setItem(slot!!, icon)
