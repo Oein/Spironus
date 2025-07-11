@@ -10,7 +10,7 @@ class ShiftF (val spironus: Spironus): Listener {
         if (event.isCancelled) return
         if (event.player.isSneaking) {
             event.isCancelled = true
-            spironus.guiManager.openGUI(ShiftFGUI(), event.player)
+            spironus.guiManager.openGUI(ShiftFGUI(spironus), event.player)
         }
     }
 }
