@@ -12,9 +12,15 @@ import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.entity.EntityDeathEvent
 import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.persistence.PersistentDataType
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 class SinsangListener(val spironus: Spironus): Listener {
     val sinSnagUUIDKey = NamespacedKey("spironus", "ss_uuid")
+
+    val jumryungStartAt = 12 + 7
+    val jumryungEndAt = 12 + 10
 
     @EventHandler
     fun onEntityHurt(event: EntityDamageEvent) {
@@ -23,6 +29,9 @@ class SinsangListener(val spironus: Spironus): Listener {
             val sinsangUUID = event.entity.persistentDataContainer.get(sinSnagUUIDKey, PersistentDataType.STRING)
             if (sinsangUUID == null) return
             for(a in 0..200) len.heal(10.0)
+
+            val currentDateTime = LocalDateTime.now().hour
+            val isJumryungTime = currentDateTime in jumryungStartAt..jumryungEndAt
 
             if(event.cause != EntityDamageEvent.DamageCause.ENTITY_ATTACK && event.cause != EntityDamageEvent.DamageCause.PROJECTILE && event.cause != EntityDamageEvent.DamageCause.FIRE_TICK) return
             val hitBy = event.damageSource
@@ -36,6 +45,10 @@ class SinsangListener(val spironus: Spironus): Listener {
                         event.isCancelled = true
                         player.sendMessage { Component.text("무소속 상태로는 신상을 점령할 수 없습니다.", NamedTextColor.RED) }
                     }
+                    else if(!isJumryungTime) {
+                        event.isCancelled = true
+                        player.sendMessage { Component.text("점령 시간은 ${jumryungStartAt}시 부터 ${jumryungEndAt}시 사이 입니다.", NamedTextColor.RED) }
+                    }
                     else if(team is String) {
                         spironus.sinsangManager.setLastHitterName(sinsangUUID, player.name)
                         spironus.sinsangManager.damage(sinsangUUID, event.damage, team)
@@ -46,7 +59,8 @@ class SinsangListener(val spironus: Spironus): Listener {
             }
 
             for(a in 0..200) len.heal(10.0)
-            spironus.sinsangManager.damage(sinsangUUID, event.damage)
+            if(isJumryungTime)
+                spironus.sinsangManager.damage(sinsangUUID, event.damage)
         }
     }
 
