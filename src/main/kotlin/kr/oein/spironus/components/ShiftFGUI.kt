@@ -39,22 +39,29 @@ class ShiftFGUI(val spironus: Spironus): InventoryGUI() {
             val sinsangZ = item.getInt("locZ", 0)
             val sinsangWorlds = spironus.server.worlds.take(1)
             if(sinsangWorlds.isEmpty()) continue
+
             val sinsangWorld = sinsangWorlds[0]
             var loc = Location(sinsangWorld, sinsangX.toDouble(), sinsangY.toDouble(), sinsangZ.toDouble())
             loc = sinsangWorld.getHighestBlockAt(loc).location
             loc = loc.add(0.0, 1.0, 0.0)
 
+            val sinsangTeam = item.getString("owner") ?: "-9999"
+            val playerCRC = spironus.kvdb.get("playerinfo-uuid2crc", player.uniqueId.toString())
+            val playerTeam = if(playerCRC is String) spironus.kvdb.get("playerinfo-team", playerCRC) else "-1"
+            val isTeamOwner = sinsangTeam == playerTeam
+
             val cooldownData = cooldown.getLong(key, 0L)
             val currentTime = getNowTime()
             val flowedTime = if (cooldownData == 0L) 0L else currentTime - cooldownData
-            val canUse = if(flowedTime == 0L) true else flowedTime >= cooldownSecs * 1000L // 60 seconds cooldown
+            val canUse = isTeamOwner && (if(flowedTime == 0L) true else flowedTime >= cooldownSecs * 1000L) // 60 seconds cooldown
 
             this.addButton(
                 i++,
                 InventoryButton()
                     .creator { it ->
                         val item = ItemStack(
-                            if(canUse) Material.GREEN_STAINED_GLASS_PANE
+                            if(!isTeamOwner) Material.RED_STAINED_GLASS
+                            else if(canUse) Material.GREEN_STAINED_GLASS
                             else Material.CLOCK
                         )
                         item.editMeta { meta ->
@@ -63,7 +70,9 @@ class ShiftFGUI(val spironus: Spironus): InventoryGUI() {
                             meta.lore(
                                 listOf(
                                     Component.text("위치: ${sinsangWorld.name} (${sinsangX}, ${sinsangY}, ${sinsangZ})", NamedTextColor.GRAY),
-                                    if(canUse)
+                                    if(!isTeamOwner)
+                                        Component.text("소유권 없음", NamedTextColor.RED)
+                                    else if(canUse)
                                         Component.text("클릭하여 이동", NamedTextColor.GRAY)
                                     else
                                         Component.text("쿨타임: ${(cooldownSecs - flowedTime / 1000).toInt()}초", NamedTextColor.RED)
@@ -73,19 +82,32 @@ class ShiftFGUI(val spironus: Spironus): InventoryGUI() {
                         item
                     }
                     .consumer { event ->
+                        val sinsangTeam = item.getString("owner") ?: "-9999"
+                        val playerCRC = spironus.kvdb.get("playerinfo-uuid2crc", player.uniqueId.toString())
+                        val playerTeam = if(playerCRC is String) spironus.kvdb.get("playerinfo-team", playerCRC) else "-1"
+                        val isTeamOwner = sinsangTeam == playerTeam
+
                         val cooldownData = cooldown.getLong(key, 0L)
                         val currentTime = getNowTime()
                         val flowedTime = if (cooldownData == 0L) 0L else currentTime - cooldownData
                         val canUse =
-                            if (flowedTime == 0L) true else flowedTime >= cooldownSecs * 1000L // 60 seconds cooldown
+                            isTeamOwner && (if (flowedTime == 0L) true else flowedTime >= cooldownSecs * 1000L)
 
                         event?.inventory?.close()
                         if (canUse) {
                             event?.whoClicked?.teleport(loc)
                             cooldown.set(key, currentTime) // Update cooldown time
-                        } else event?.whoClicked?.sendMessage(
+                        }
+                        else if(!isTeamOwner) {
+                            event?.whoClicked?.sendMessage(
+                                Component.text("이 신상은 당신의 팀에 속하지 않습니다.", NamedTextColor.RED)
+                            )
+                        }
+                        else {
+                            event?.whoClicked?.sendMessage(
                                 Component.text("쿨타임이 끝나지 않았습니다. 잠시 후 다시 시도해주세요.", NamedTextColor.RED)
                             )
+                        }
                     }
             )
         }

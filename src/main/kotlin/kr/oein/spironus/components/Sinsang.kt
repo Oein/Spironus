@@ -21,7 +21,7 @@ class Sinsang(val uuid: String, val spironus: Spironus) {
     var slime: LivingEntity? = null
     var blockDisplay: BlockDisplay? = null
     var health: Double = confDefaultHealth
-    var owner = "-1"
+    var owner = "-9999"
     var ownerTemaName = "미점령"
 
     var lastHitterName = ""
@@ -62,7 +62,7 @@ class Sinsang(val uuid: String, val spironus: Spironus) {
             blockDisplay = spironus.server.getEntity(blockUUID) as? BlockDisplay
         }
 
-        owner = section.getString("owner")?: "-1"
+        owner = section.getString("owner")?: "-9999"
         health = section.getDouble("health", confDefaultHealth)
         locX = section.getDouble("locX", 0.0)
         locY = section.getDouble("locY", 0.0)
@@ -72,7 +72,7 @@ class Sinsang(val uuid: String, val spironus: Spironus) {
         updateBossbarTitle()
     }
 
-    var lastDamagedTeam = "-1"
+    var lastDamagedTeam = "-9999"
 
     private fun checkDestroyed() {
         if (health <= 0) {
@@ -128,7 +128,7 @@ class Sinsang(val uuid: String, val spironus: Spironus) {
     }
 
     fun updateBossbarTitle() {
-        if(owner == "-1") {
+        if(owner == "-9999") {
             ownerTemaName = "미점령"
         } else {
             spironus.logger.info { "Owner: $owner" }
@@ -183,8 +183,8 @@ class Sinsang(val uuid: String, val spironus: Spironus) {
 
             lentity.size = (sinsangSize * 2)
             lentity.registerAttribute(Attribute.MAX_HEALTH)
-            lentity.getAttribute(Attribute.MAX_HEALTH)?.let { it.baseValue = 2048.0 }
-            lentity.health = 2048.0
+            lentity.getAttribute(Attribute.MAX_HEALTH)?.let { it.baseValue = 1024.0 }
+            lentity.health = 1024.0
 
             val sinsangUUIDKey = NamespacedKey("spironus", "ss_uuid")
             val sinsangSessionKey = NamespacedKey("spironus", "ss_session")

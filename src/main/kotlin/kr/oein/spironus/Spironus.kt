@@ -11,6 +11,7 @@ import kr.oein.spironus.components.Tablist
 import kr.oein.spironus.components.SinsangListener
 import kr.oein.spironus.components.SinsangManageCommand
 import kr.oein.spironus.components.SinsangManager
+import kr.oein.spironus.components.TeamChest
 import kr.oein.spironus.components.Whitelist
 import kr.oein.spironus.web.WebServer
 
@@ -26,6 +27,7 @@ class Spironus : JavaPlugin() {
     val sinsangManager = SinsangManager(this)
     val webServer = WebServer(this)
     val tablistManager = Tablist(this)
+    val teamChest = TeamChest(this)
 
     val sessionID = Random().generate()
     
@@ -36,6 +38,7 @@ class Spironus : JavaPlugin() {
         Bukkit.getPluginManager().registerEvents(ShiftF(this), this)
         Bukkit.getPluginManager().registerEvents(SinsangListener(this), this)
         Bukkit.getPluginManager().registerEvents(tablistManager, this)
+        Bukkit.getPluginManager().registerEvents(teamChest, this)
 
         saveDefaultConfig()
         config.get("listen") ?.let {
@@ -56,6 +59,7 @@ class Spironus : JavaPlugin() {
 
     override fun onLoad() {
         sinsangManageCommand.registerCommands()
+        teamChest.registerCommands()
     }
 
     override fun onDisable() {
